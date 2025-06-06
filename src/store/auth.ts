@@ -1,0 +1,153 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { User, LoginRequest, RegisterRequest } from '@/types'
+import { authApi } from '@/lib/api'
+import { setAuthToken, removeAuthToken } from '@/lib/axios'
+import toast from 'react-hot-toast'
+
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  isHydrated: boolean
+  login: (data: LoginRequest) => Promise<void>
+  register: (data: RegisterRequest) => Promise<void>
+  logout: () => Promise<void>
+  refreshUser: () => Promise<void>
+  setUser: (user: User | null) => void
+  hydrate: () => void
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      isHydrated: false,
+
+      login: async (data: LoginRequest) => {
+        try {
+          set({ isLoading: true })
+          const response = await authApi.login(data)
+          const { access_token, refresh_token, user } = response.data
+
+          localStorage.setItem('access_token', access_token)
+          localStorage.setItem('refresh_token', refresh_token)
+          document.cookie = `access_token=${access_token}; path=/; max-age=${30 * 24 * 60 * 60}`
+          setAuthToken(access_token)
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          })
+
+          toast.success('Successfully logged in!')
+        } catch (error: any) {
+          set({ isLoading: false })
+          const message = error.response?.data?.message || 'Login failed'
+          toast.error(message)
+          throw error
+        }
+      },
+
+      register: async (data: RegisterRequest) => {
+        try {
+          set({ isLoading: true })
+          const response = await authApi.register(data)
+          const { access_token, refresh_token, user } = response.data
+
+          localStorage.setItem('access_token', access_token)
+          localStorage.setItem('refresh_token', refresh_token)
+          document.cookie = `access_token=${access_token}; path=/; max-age=${30 * 24 * 60 * 60}`
+          setAuthToken(access_token)
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          })
+
+          toast.success('Account created successfully!')
+        } catch (error: any) {
+          set({ isLoading: false })
+          const message = error.response?.data?.message || 'Registration failed'
+          toast.error(message)
+          throw error
+        }
+      },
+
+      logout: async () => {
+        try {
+          await authApi.logout()
+        } catch (error) {
+          console.error('Logout error:', error)
+        } finally {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          document.cookie =
+            'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+          removeAuthToken()
+
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          })
+
+          toast.success('Successfully logged out!')
+        }
+      },
+
+      refreshUser: async () => {
+        try {
+          const response = await authApi.me()
+          set({
+            user: response.data,
+            isAuthenticated: true,
+          })
+        } catch (error) {
+          console.error('Failed to refresh user:', error)
+          get().logout()
+        }
+      },
+
+      setUser: (user: User | null) => {
+        set({
+          user,
+          isAuthenticated: !!user,
+        })
+      },
+
+      hydrate: () => {
+        const token = localStorage.getItem('access_token')
+        if (token) {
+          setAuthToken(token)
+          // Only refresh user if we don't already have user data
+          const currentState = get()
+          if (!currentState.user && currentState.isAuthenticated) {
+            get()
+              .refreshUser()
+              .catch(() => {
+                get().logout()
+              })
+          }
+        }
+        set({ isHydrated: true })
+      },
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.hydrate()
+        }
+      },
+    }
+  )
+)

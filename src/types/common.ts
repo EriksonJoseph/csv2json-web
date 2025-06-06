@@ -1,0 +1,53 @@
+export interface ApiResponse<T = any> {
+  success: boolean
+  data: T
+  message?: string
+  errors?: Record<string, string[]>
+}
+
+export interface PaginationParams {
+  page?: number
+  per_page?: number
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
+}
+
+export interface PaginatedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  per_page: number
+  total_pages: number
+  has_next: boolean
+  has_prev: boolean
+}
+
+export interface ErrorResponse {
+  error: string
+  message: string
+  status_code: number
+  details?: Record<string, any>
+}
+
+export interface LoadingState {
+  isLoading: boolean
+  error?: string
+}
+
+export type Theme = 'light' | 'dark' | 'system'
+
+export interface NotificationSettings {
+  email_notifications: boolean
+  push_notifications: boolean
+  task_completion: boolean
+  system_alerts: boolean
+}
+
+export interface SystemHealth {
+  status: 'healthy' | 'degraded' | 'down'
+  database: 'connected' | 'disconnected'
+  redis: 'connected' | 'disconnected'
+  storage: 'available' | 'unavailable'
+  background_tasks: 'running' | 'stopped'
+  last_check: string
+}
