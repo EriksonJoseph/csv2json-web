@@ -216,14 +216,28 @@ export default function TasksPage() {
                             Edit
                           </DropdownMenuItem>
                           {task.is_done_created_doc && !task.error_message && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                router.push(`/matching?task=${task._id}`)
-                              }
-                            >
-                              <Search className="mr-2 h-4 w-4" />
-                              Start Matching
-                            </DropdownMenuItem>
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(
+                                    `/matching/form?task_id=${task._id}&type=single`
+                                  )
+                                }
+                              >
+                                <Search className="mr-2 h-4 w-4" />
+                                Single Matching
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(
+                                    `/matching/form?task_id=${task._id}&type=bulk`
+                                  )
+                                }
+                              >
+                                <Search className="mr-2 h-4 w-4" />
+                                Bulk Matching
+                              </DropdownMenuItem>
+                            </>
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

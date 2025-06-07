@@ -52,7 +52,7 @@ export function FileList() {
       filesApi
         .list({
           page,
-          per_page: 10,
+          limit: 10,
           // Note: These filters would need to be implemented in the backend
         })
         .then((res) => res.data),
@@ -171,7 +171,7 @@ export function FileList() {
           </div>
         </CardHeader>
         <CardContent>
-          {filesData?.files.length ? (
+          {filesData?.files?.length ? (
             <div className="space-y-4">
               {filesData.files.map((file: FileItem) => (
                 <div
