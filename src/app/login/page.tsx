@@ -54,7 +54,8 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data)
-      router.push('/dashboard')
+      // Force hard redirect to ensure state is properly loaded
+      window.location.href = '/dashboard'
     } catch (error) {
       console.error('Login error:', error)
     }

@@ -154,7 +154,7 @@ export function TaskList() {
           </div>
         </CardHeader>
         <CardContent>
-          {tasksData?.tasks.length ? (
+          {tasksData?.tasks?.length ? (
             <div className="space-y-4">
               {tasksData.tasks.map((task: Task) => (
                 <div

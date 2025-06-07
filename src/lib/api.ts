@@ -42,7 +42,7 @@ export const authApi = {
   refresh: (data: TokenRefreshRequest) =>
     api.post<AuthResponse>('/auth/refresh', data),
 
-  logout: () => api.post('/auth/logout'),
+  logout: (data: TokenRefreshRequest) => api.post('/auth/logout', data),
 
   me: () => api.get<User>('/auth/me'),
 }

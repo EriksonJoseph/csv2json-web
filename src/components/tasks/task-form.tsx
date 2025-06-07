@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,12 +15,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus } from 'lucide-react'
 import { tasksApi, filesApi } from '@/lib/api'
 import { LoadingButton } from '@/components/ui/loading'
-import { TaskCreateRequest } from '@/types'
+import { TaskCreateRequest, Task } from '@/types'
 import toast from 'react-hot-toast'
 import { FileUpload } from '@/components/files/file-upload'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 const taskSchema = z.object({
   topic: z.string().min(1, 'Task name is required'),
@@ -33,18 +33,24 @@ const taskSchema = z.object({
 
 type TaskForm = z.infer<typeof taskSchema>
 
-interface TaskCreateProps {
+interface TaskFormProps {
+  taskId?: string
+  mode?: 'create' | 'edit'
   onSuccess?: () => void
 }
 
-export function TaskCreate({ onSuccess }: TaskCreateProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function TaskForm({
+  taskId,
+  mode = 'create',
+  onSuccess,
+}: TaskFormProps) {
   const queryClient = useQueryClient()
+  const router = useRouter()
 
-  const { data: filesData } = useQuery({
-    queryKey: ['files'],
-    queryFn: () => filesApi.list({ limit: 100 }).then((res) => res.data),
-    enabled: isOpen,
+  const { data: taskData } = useQuery({
+    queryKey: ['task', taskId],
+    queryFn: () => tasksApi.get(taskId!).then((res) => res.data),
+    enabled: mode === 'edit' && !!taskId,
   })
 
   const {
@@ -64,14 +70,23 @@ export function TaskCreate({ onSuccess }: TaskCreateProps) {
     },
   })
 
+  useEffect(() => {
+    if (mode === 'edit' && taskData) {
+      setValue('topic', taskData.topic || '')
+      setValue('created_file_date', taskData.created_file_date || '')
+      setValue('updated_file_date', taskData.updated_file_date || '')
+      setValue('references', taskData.references || '')
+      setValue('file_id', taskData.file_id || '')
+    }
+  }, [taskData, mode, setValue])
+
   const createMutation = useMutation({
     mutationFn: (data: TaskCreateRequest) => tasksApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       toast.success('Task created successfully!')
       reset()
-      setIsOpen(false)
-      onSuccess?.()
+      onSuccess?.() || router.push('/tasks')
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create task')
@@ -79,30 +94,20 @@ export function TaskCreate({ onSuccess }: TaskCreateProps) {
   })
 
   const onSubmit = async (data: TaskForm) => {
-    createMutation.mutate(data)
+    if (mode === 'edit') {
+    } else {
+      createMutation.mutate(data)
+    }
   }
 
   const setFileId = (data: any) => {
     setValue('file_id', data._id)
   }
 
-  if (!isOpen) {
-    return (
-      <Button onClick={() => setIsOpen(true)}>
-        <Plus className="mr-2 h-4 w-4" />
-        Create Task
-      </Button>
-    )
-  }
+  const isLoading = createMutation.isPending
 
   return (
-    <Card>
-      <CardHeader className="border-0 border-red-500">
-        <CardTitle>Create New Task</CardTitle>
-        <CardDescription>
-          Create a processing task for your uploaded file
-        </CardDescription>
-      </CardHeader>
+    <Card className="pt-4">
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -161,31 +166,35 @@ export function TaskCreate({ onSuccess }: TaskCreateProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="topic">File ID</Label>
+            <Label htmlFor="file_id">File ID</Label>
             <Input
               id="file_id"
-              placeholder="Enter task name"
+              placeholder="Enter file ID"
               {...register('file_id')}
               disabled
             />
           </div>
 
-          <FileUpload afterSuccess={(data) => setFileId(data)} />
+          {mode === 'create' && (
+            <FileUpload afterSuccess={(data) => setFileId(data)} />
+          )}
 
           <div className="flex items-center space-x-2 pt-4">
-            {/* <Button type="submit" disabled={createMutation.isPending}> */}
-            <Button type="submit">
-              <LoadingButton isLoading={createMutation.isPending}>
-                {createMutation.isPending ? 'Creating...' : 'Create Task'}
+            <Button type="submit" disabled={isLoading}>
+              <LoadingButton isLoading={isLoading}>
+                {isLoading
+                  ? mode === 'edit'
+                    ? 'Updating...'
+                    : 'Creating...'
+                  : mode === 'edit'
+                    ? 'Update Task'
+                    : 'Create Task'}
               </LoadingButton>
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setIsOpen(false)
-                reset()
-              }}
+              onClick={() => router.push('/tasks')}
             >
               Cancel
             </Button>

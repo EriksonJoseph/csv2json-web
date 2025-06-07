@@ -1,18 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -85,13 +78,7 @@ export default function WatchListFormPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Watchlist Information</CardTitle>
-          <CardDescription>
-            Enter the title and list of names for your watchlist
-          </CardDescription>
-        </CardHeader>
+      <Card className="pt-4">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">

@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import toast from 'react-hot-toast'
-import { AuthResponse, TokenRefreshResponse } from '@/types'
+import { TokenRefreshResponse } from '@/types'
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -99,12 +99,25 @@ api.interceptors.response.use(
       }
     }
 
+    // Handle 403 Forbidden - redirect to login
+    if (error.response?.status === 403) {
+      console.log('403 Forbidden detected, redirecting to login...')
+
+      // Use dynamic import to avoid circular dependency
+      import('@/store/auth').then(({ useAuthStore }) => {
+        const authStore = useAuthStore.getState()
+        authStore.forceLogout()
+      })
+
+      return Promise.reject(error)
+    }
+
     const errorMessage =
       (error.response?.data as any)?.message ||
       (error as Error).message ||
       'An error occurred'
 
-    if (error.response?.status !== 401) {
+    if (error.response?.status !== 401 && error.response?.status !== 403) {
       toast.error(errorMessage)
     }
 

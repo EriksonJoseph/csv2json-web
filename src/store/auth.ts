@@ -13,6 +13,7 @@ interface AuthState {
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
   logout: () => Promise<void>
+  forceLogout: () => void
   refreshUser: () => Promise<void>
   setUser: (user: User | null) => void
   hydrate: () => void
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
             user,
             isAuthenticated: true,
             isLoading: false,
+            isHydrated: true,
           })
 
           toast.success('Successfully logged in!')
@@ -67,6 +69,7 @@ export const useAuthStore = create<AuthState>()(
             user,
             isAuthenticated: true,
             isLoading: false,
+            isHydrated: true,
           })
 
           toast.success('Account created successfully!')
@@ -80,7 +83,8 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await authApi.logout()
+          const refresh_token = localStorage.getItem('refresh_token') || ''
+          await authApi.logout({ refresh_token })
         } catch (error) {
           console.error('Logout error:', error)
         } finally {
@@ -100,6 +104,25 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      forceLogout: () => {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        document.cookie =
+          'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        removeAuthToken()
+
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
+
+        // Force redirect using window.location
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login'
+        }
+      },
+
       refreshUser: async () => {
         try {
           const response = await authApi.me()
@@ -109,7 +132,10 @@ export const useAuthStore = create<AuthState>()(
           })
         } catch (error) {
           console.error('Failed to refresh user:', error)
-          get().logout()
+          // Only logout if the error is not a 401 (which will be handled by axios interceptor)
+          if ((error as any)?.response?.status !== 401) {
+            get().logout()
+          }
         }
       },
 
@@ -124,9 +150,13 @@ export const useAuthStore = create<AuthState>()(
         const token = localStorage.getItem('access_token')
         if (token) {
           setAuthToken(token)
-          // Only refresh user if we don't already have user data
+          // Only refresh user if we don't already have user data and are not already hydrated
           const currentState = get()
-          if (!currentState.user && currentState.isAuthenticated) {
+          if (
+            !currentState.user &&
+            currentState.isAuthenticated &&
+            !currentState.isHydrated
+          ) {
             get()
               .refreshUser()
               .catch(() => {

@@ -59,19 +59,21 @@ export interface BulkSearchResponse {
 }
 
 export interface SearchHistoryItem {
-  id: string
-  task_id: string
-  task_name: string
-  column_name: string
-  search_term: string
-  threshold: number
-  result_count: number
-  search_time: number
+  _id: string
+  search_id: string
+  columns_used: string[]
   created_at: string
+  created_by: string
+  query_names: string
+  results_found: number
+  search_type: 'bulk' | 'search'
+  task_id: string
+  threshold_used: number
+  total_searched: number
 }
 
 export interface SearchHistoryResponse {
-  history: SearchHistoryItem[]
+  list: SearchHistoryItem[]
   total: number
   page: number
   per_page: number

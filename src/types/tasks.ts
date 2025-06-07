@@ -28,7 +28,7 @@ export interface TaskCreateResponse {
 }
 
 export interface TaskListResponse {
-  tasks: Task[]
+  list: Task[]
   total: number
   page: number
   per_page: number

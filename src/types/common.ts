@@ -6,8 +6,8 @@ export interface ApiResponse<T = any> {
 }
 
 export interface PaginationParams {
-  page?: number
-  per_page?: number
+  page: number
+  limit: number
   sort_by?: string
   sort_order?: 'asc' | 'desc'
 }
@@ -20,6 +20,17 @@ export interface PaginatedResponse<T> {
   total_pages: number
   has_next: boolean
   has_prev: boolean
+}
+
+export interface PaginationConfig {
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  itemsPerPage: number
+  maxVisiblePages?: number
+  showInfo?: boolean
+  showItemsPerPageSelector?: boolean
+  itemsPerPageOptions?: number[]
 }
 
 export interface ErrorResponse {

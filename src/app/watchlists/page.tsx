@@ -6,54 +6,26 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Eye, Plus, Edit, Settings } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Search, Eye, Plus, Edit } from 'lucide-react'
+import { Pagination } from '@/components/ui/pagination'
 import { watchlistsApi } from '@/lib/api'
-
-interface WatchlistItem {
-  _id: string
-  name: string
-  description: string
-  symbol: string
-  price: number
-  change: number
-  changePercent: number
-  category: string
-  isActive: boolean
-  lastUpdated: string
-  watcherCount: number
-}
 
 export default function WatchListPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(9)
+  const [limit, setLimit] = useState(9)
   const router = useRouter()
 
   const { data: watchlistsData, isLoading } = useQuery({
-    queryKey: ['watchlists', page, searchQuery, perPage],
-    queryFn: () =>
-      watchlistsApi
-        .list({
-          page,
-          per_page: perPage,
-        })
-        .then((res) => res?.data),
+    queryKey: ['watchlists', page, searchQuery, limit],
+    queryFn: () => {
+      const body = {
+        page,
+        limit: limit,
+      }
+      return watchlistsApi.list(body).then((res) => res?.data)
+    },
   })
-
-  // Reset page when perPage changes
-  const handlePerPageChange = (value: string) => {
-    setPerPage(Number(value))
-    setPage(1) // Reset to first page
-  }
-
-  console.log(`🚀🙈 TORPONG [page.tsx] watchlistsData`, watchlistsData)
 
   if (isLoading) {
     return (
@@ -155,66 +127,18 @@ export default function WatchListPage() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between pt-4">
-                <p className="text-sm text-muted-foreground">
-                  Showing {(page - 1) * perPage + 1} to{' '}
-                  {Math.min(page * perPage, watchlistsData.total)} of{' '}
-                  {watchlistsData.total} watchlists
-                </p>
-                <Select
-                  value={perPage.toString()}
-                  onValueChange={handlePerPageChange}
-                >
-                  <SelectTrigger className="w-32">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1/page</SelectItem>
-                    <SelectItem value="6">6/page</SelectItem>
-                    <SelectItem value="9">9/page</SelectItem>
-                    <SelectItem value="12">12/page</SelectItem>
-                    <SelectItem value="15">15/page</SelectItem>
-                    <SelectItem value="24">24/page</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <div className="flex items-center space-x-1">
-                    {Array.from(
-                      { length: Math.min(5, watchlistsData.total_pages) },
-                      (_, i) => {
-                        const pageNum = i + 1
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={page === pageNum ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPage(pageNum)}
-                          >
-                            {pageNum}
-                          </Button>
-                        )
-                      }
-                    )}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page >= watchlistsData.total_pages}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
+              <Pagination
+                currentPage={page}
+                totalItems={watchlistsData.total}
+                itemsPerPage={limit}
+                onPageChange={setPage}
+                onItemsPerPageChange={(newPerPage) => {
+                  setLimit(newPerPage)
+                  setPage(1)
+                }}
+                itemsPerPageOptions={[1, 6, 9, 12, 15, 24]}
+                className="pt-4"
+              />
             </div>
           ) : (
             <div className="py-12 text-center">
