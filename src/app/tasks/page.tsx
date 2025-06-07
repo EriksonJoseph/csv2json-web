@@ -39,6 +39,7 @@ export default function TasksPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
+  // #region API
   const { data: tasksData, isLoading } = useQuery({
     queryKey: ['tasks', page, searchQuery, limit],
     queryFn: () => {
@@ -51,6 +52,7 @@ export default function TasksPage() {
     },
     refetchInterval: 5000,
   })
+  // #endregion
 
   const deleteMutation = useMutation({
     mutationFn: (taskId: string) => tasksApi.delete(taskId),

@@ -42,12 +42,12 @@ export function formatDate(
 
 export function formatRelativeTime(date: string | Date) {
   if (!date) return 'Invalid date'
-  
+
   const now = new Date()
   const targetDate = new Date(date)
-  
+
   if (isNaN(targetDate.getTime())) return 'Invalid date'
-  
+
   const diffInMs = now.getTime() - targetDate.getTime()
 
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
@@ -149,4 +149,12 @@ export function validatePassword(password: string): {
     isValid: errors.length === 0,
     errors,
   }
+}
+
+export function getPagiantionRowNumber({
+  page = 1,
+  limit = 9,
+  index = 0,
+}): number {
+  return (page - 1) * limit + index + 1
 }
