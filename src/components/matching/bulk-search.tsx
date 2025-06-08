@@ -62,7 +62,6 @@ export function BulkSearch({ taskId, columnName }: BulkSearchProps) {
   })
 
   const threshold = watch('threshold')
-  const limitPerTerm = watch('limit_per_term')
 
   const searchMutation = useMutation({
     mutationFn: (data: BulkSearchRequest) => matchingApi.bulkSearch(data),
@@ -129,10 +128,9 @@ export function BulkSearch({ taskId, columnName }: BulkSearchProps) {
 
     const searchRequest: BulkSearchRequest = {
       task_id: taskId,
-      column_name: columnName,
-      search_terms: searchTerms,
+      columns: [columnName],
+      list: searchTerms,
       threshold: data.threshold / 100,
-      limit_per_term: data.limit_per_term,
     }
 
     searchMutation.mutate(searchRequest)
@@ -289,22 +287,16 @@ export function BulkSearch({ taskId, columnName }: BulkSearchProps) {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={searchMutation.isPending}
-              className="w-full"
-            >
-              {searchMutation.isPending ? (
-                <LoadingButton isLoading={true}>
-                  Searching...
-                </LoadingButton>
-              ) : (
-                <>
-                  <Search className="mr-2 h-4 w-4" />
-                  Bulk Search
-                </>
-              )}
-            </Button>
+            {searchMutation.isPending ? (
+              <LoadingButton isLoading={true} className="w-full">
+                Searching...
+              </LoadingButton>
+            ) : (
+              <Button type="submit" className="w-full">
+                <Search className="mr-2 h-4 w-4" />
+                Bulk Search
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>

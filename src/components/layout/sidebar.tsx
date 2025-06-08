@@ -19,11 +19,9 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Files', href: '/files', icon: FileText },
+  { name: 'Watchlists', href: '/watchlists', icon: Bookmark },
   { name: 'Tasks', href: '/tasks', icon: ListTodo },
   { name: 'Matching', href: '/matching', icon: Search },
-  { name: 'Watchlists', href: '/watchlists', icon: Bookmark },
-  { name: 'Profile', href: '/profile', icon: User },
 ]
 
 export function Sidebar() {

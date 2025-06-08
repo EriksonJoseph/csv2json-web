@@ -2,14 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
-import { Upload, Plus, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { tasksApi } from '@/lib/api'
 
 export default function DashboardPage() {
-  const router = useRouter()
-
   const { data: currentTask } = useQuery({
     queryKey: ['current-processing'],
     queryFn: () => tasksApi.getCurrentProcessing().then((res) => res.data),
@@ -24,19 +20,6 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">
             Welcome back! Here&apos;s what&apos;s happening with your data.
           </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => router.push('/files?action=upload')}>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload File
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => router.push('/tasks?action=create')}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Task
-          </Button>
         </div>
       </div>
 

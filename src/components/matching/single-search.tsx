@@ -18,9 +18,9 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Search, Download, Clock } from 'lucide-react'
+import { Search, Download } from 'lucide-react'
 import { matchingApi } from '@/lib/api'
-import { SearchRequest, SearchResult } from '@/types'
+import { SingleSearchRequest, SearchResult } from '@/types'
 import { copyToClipboard } from '@/lib/utils'
 import { LoadingButton } from '@/components/ui/loading'
 import toast from 'react-hot-toast'
@@ -59,10 +59,9 @@ export function SingleSearch({ taskId, columnName }: SingleSearchProps) {
   })
 
   const threshold = watch('threshold')
-  const limit = watch('limit')
 
   const searchMutation = useMutation({
-    mutationFn: (data: SearchRequest) => matchingApi.search(data),
+    mutationFn: (data: SingleSearchRequest) => matchingApi.search(data),
     onSuccess: (response) => {
       const { results, search_time, total_matches } = response.data
       setResults(results)
@@ -78,7 +77,7 @@ export function SingleSearch({ taskId, columnName }: SingleSearchProps) {
   })
 
   const onSubmit = (data: SearchForm) => {
-    const searchRequest: SearchRequest = {
+    const searchRequest: SingleSearchRequest = {
       task_id: taskId,
       column_name: columnName,
       search_term: data.search_term,
@@ -184,9 +183,7 @@ export function SingleSearch({ taskId, columnName }: SingleSearchProps) {
               className="w-full"
             >
               {searchMutation.isPending ? (
-                <LoadingButton isLoading={true}>
-                  Searching...
-                </LoadingButton>
+                <LoadingButton isLoading={true}>Searching...</LoadingButton>
               ) : (
                 <>
                   <Search className="mr-2 h-4 w-4" />

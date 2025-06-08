@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { matchingApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   ArrowLeft,
@@ -17,14 +15,12 @@ import {
   Users,
   TrendingUp,
   Download,
-  Filter,
 } from 'lucide-react'
 
 export default function MatchingResultPage() {
   const params = useParams()
   const router = useRouter()
   const searchId = params.id as string
-  const [filterTerm, setFilterTerm] = useState('')
 
   // Fetch matching result
   const {
@@ -87,12 +83,6 @@ export default function MatchingResultPage() {
         </Card>
       </div>
     )
-  }
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return 'bg-green-100 text-green-800'
-    if (confidence >= 60) return 'bg-yellow-100 text-yellow-800'
-    return 'bg-red-100 text-red-800'
   }
 
   return (

@@ -80,7 +80,7 @@ export function MultiSelect({
           )}
           disabled={disabled}
         >
-          <div className="flex flex-wrap gap-1 flex-1 mr-2">
+          <div className="mr-2 flex flex-1 flex-wrap gap-1">
             {selected.length > 0 ? (
               selectedOptions.length <= 2 ? (
                 selectedOptions.map((option) => (
@@ -91,7 +91,7 @@ export function MultiSelect({
                   >
                     {option.label}
                     <span
-                      className="ml-1 hover:bg-muted rounded-full cursor-pointer inline-flex"
+                      className="ml-1 inline-flex cursor-pointer rounded-full hover:bg-muted"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleUnselect(option.value)
@@ -106,9 +106,7 @@ export function MultiSelect({
                   <Badge variant="secondary" className="mr-1">
                     {selectedOptions[0]?.label}
                   </Badge>
-                  <Badge variant="secondary">
-                    +{selected.length - 1} more
-                  </Badge>
+                  <Badge variant="secondary">+{selected.length - 1} more</Badge>
                 </>
               )
             ) : (
@@ -118,8 +116,11 @@ export function MultiSelect({
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 max-h-80" onCloseAutoFocus={(e) => e.preventDefault()}>
-        <div className="p-2 border-b" onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuContent
+        className="max-h-80 w-56"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        <div className="border-b p-2" onClick={(e) => e.stopPropagation()}>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -152,7 +153,7 @@ export function MultiSelect({
               </DropdownMenuItem>
             ))
           ) : (
-            <div className="p-2 text-sm text-muted-foreground text-center">
+            <div className="p-2 text-center text-sm text-muted-foreground">
               No options found
             </div>
           )}

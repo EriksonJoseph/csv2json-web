@@ -10,6 +10,14 @@ export interface SearchRequest {
   threshold: number
 }
 
+export interface SingleSearchRequest {
+  task_id: string
+  column_name: string
+  search_term: string
+  threshold: number
+  limit: number
+}
+
 export interface SearchResult {
   value: string
   score: number

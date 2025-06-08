@@ -43,7 +43,8 @@ export function TaskCreate({ onSuccess }: TaskCreateProps) {
 
   const { data: filesData } = useQuery({
     queryKey: ['files'],
-    queryFn: () => filesApi.list({ limit: 100 }).then((res) => res.data),
+    queryFn: () =>
+      filesApi.list({ page: 1, limit: 100 }).then((res) => res.data),
     enabled: isOpen,
   })
 

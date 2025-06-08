@@ -9,14 +9,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Search, Upload, Plus, X, RefreshCw } from 'lucide-react'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { matchingApi, tasksApi } from '@/lib/api'
-import { SearchRequest, BulkSearchRequest } from '@/types/matching'
+import { ArrowLeft, Search, RefreshCw } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { matchingApi } from '@/lib/api'
+import {
+  SearchRequest,
+  SingleSearchRequest,
+  BulkSearchRequest,
+} from '@/types/matching'
 import { toast } from 'react-hot-toast'
 import { useSearchParams } from 'next/navigation'
-import { string, z } from 'zod'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { MultiSelect, Option } from '@/components/ui/multi-select'
@@ -68,7 +71,6 @@ export default function MatchingFormPage() {
     register,
     handleSubmit,
     setValue,
-    reset,
     watch,
     formState: { errors },
   } = useForm<SearchForm>({
@@ -137,7 +139,7 @@ export default function MatchingFormPage() {
   useEffect(() => {
     setValue('task_id', task_id || '')
     blukFormHook.setValue('task_id', task_id || '')
-  }, [task_id])
+  }, [task_id, setValue, blukFormHook])
 
   useEffect(() => {
     setValue('columns', selectedColumns)
@@ -145,7 +147,17 @@ export default function MatchingFormPage() {
 
   // Single Search Mutation
   const singleSearchMutation = useMutation({
-    mutationFn: (data: SearchRequest) => matchingApi.search(data),
+    mutationFn: (data: SearchRequest) => {
+      // Transform SearchRequest to SingleSearchRequest for API
+      const singleSearchData: SingleSearchRequest = {
+        task_id: data.task_id,
+        column_name: data.columns.join(','), // Join multiple columns
+        search_term: data.name,
+        threshold: data.threshold,
+        limit: 1000, // Default limit
+      }
+      return matchingApi.search(singleSearchData)
+    },
     onSuccess: (response) => {
       toast.success(
         `Found ${response.data.total_matches} matches in ${response.data.search_time}ms`

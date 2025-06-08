@@ -76,8 +76,11 @@ export function SearchableSelect({
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 max-h-80" onCloseAutoFocus={(e) => e.preventDefault()}>
-        <div className="p-2 border-b" onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuContent
+        className="max-h-80 w-56"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        <div className="border-b p-2" onClick={(e) => e.stopPropagation()}>
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -106,7 +109,7 @@ export function SearchableSelect({
               </DropdownMenuItem>
             ))
           ) : (
-            <div className="p-2 text-sm text-muted-foreground text-center">
+            <div className="p-2 text-center text-sm text-muted-foreground">
               No options found
             </div>
           )}

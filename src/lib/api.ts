@@ -14,6 +14,7 @@ import {
   CurrentProcessingTask,
   TaskColumnsResponse,
   SearchRequest,
+  SingleSearchRequest,
   SearchResponse,
   BulkSearchRequest,
   BulkSearchResponse,
@@ -93,7 +94,7 @@ export const matchingApi = {
   getColumns: (taskId: string) =>
     api.get<TaskColumnsResponse>(`/matching/columns/${taskId}`),
 
-  search: (data: SearchRequest) =>
+  search: (data: SingleSearchRequest) =>
     api.post<SearchResponse>('/matching/search', data, {
       timeout: 300000, // 5 minutes (300,000ms)
     }),

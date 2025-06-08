@@ -56,9 +56,7 @@ export function SingleFileUpload({
       formData.append('file', file)
 
       return filesApi.upload(formData, (progress) => {
-        setUploadingFile((prev) =>
-          prev ? { ...prev, progress } : null
-        )
+        setUploadingFile((prev) => (prev ? { ...prev, progress } : null))
       })
     },
     onSuccess: (data, file) => {
@@ -88,7 +86,7 @@ export function SingleFileUpload({
       if (acceptedFiles.length === 0) return
 
       const file = acceptedFiles[0] // Only take the first file for single upload
-      
+
       setUploadingFile({
         file,
         progress: 0,
@@ -188,7 +186,9 @@ export function SingleFileUpload({
                   )}
 
                   {uploadingFile.status === 'error' && uploadingFile.error && (
-                    <p className="text-xs text-red-500">{uploadingFile.error}</p>
+                    <p className="text-xs text-red-500">
+                      {uploadingFile.error}
+                    </p>
                   )}
 
                   {uploadingFile.status === 'completed' && (

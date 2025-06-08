@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -17,12 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { FileText, CheckCircle } from 'lucide-react'
-import { tasksApi, matchingApi } from '@/lib/api'
-import { Task, ColumnInfo } from '@/types'
-import { formatRelativeTime } from '@/lib/utils'
+import { matchingApi } from '@/lib/api'
 
 interface TaskSelectorProps {
   selectedTaskId?: string
@@ -37,7 +32,7 @@ export function TaskSelector({
   onTaskSelect,
   onColumnSelect,
 }: TaskSelectorProps) {
-  const [columns, setColumns] = useState<ColumnInfo[]>([])
+  const [columns, setColumns] = useState<string[]>([])
 
   const { data: columnsData, isLoading: isLoadingColumns } = useQuery({
     queryKey: ['task-columns', selectedTaskId],
@@ -88,18 +83,8 @@ export function TaskSelector({
                 </SelectTrigger>
                 <SelectContent>
                   {columns.map((column) => (
-                    <SelectItem key={column.name} value={column.name}>
-                      <div className="flex w-full items-center justify-between">
-                        <div>
-                          <span className="font-medium">{column.name}</span>
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            ({column.type})
-                          </span>
-                        </div>
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          {column.unique_count} unique
-                        </span>
-                      </div>
+                    <SelectItem key={column} value={column}>
+                      {column}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -111,52 +96,11 @@ export function TaskSelector({
         {selectedColumnName && columns.length > 0 && (
           <div className="rounded-lg bg-muted p-3">
             <h4 className="mb-2 font-medium">Selected Column</h4>
-            {(() => {
-              const column = columns.find((c) => c.name === selectedColumnName)
-              if (!column) return null
-
-              return (
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <p>
-                    <strong>Name:</strong> {column.name}
-                  </p>
-                  <p>
-                    <strong>Type:</strong> {column.type}
-                  </p>
-                  <p>
-                    <strong>Unique Values:</strong>{' '}
-                    {column.unique_count.toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Null Values:</strong>{' '}
-                    {column.null_count.toLocaleString()}
-                  </p>
-                  {column.sample_values.length > 0 && (
-                    <div>
-                      <strong>Sample Values:</strong>
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {column.sample_values
-                          .slice(0, 5)
-                          .map((value, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {value}
-                            </Badge>
-                          ))}
-                        {column.sample_values.length > 5 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{column.sample_values.length - 5} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>
+                <strong>Name:</strong> {selectedColumnName}
+              </p>
+            </div>
           </div>
         )}
       </CardContent>

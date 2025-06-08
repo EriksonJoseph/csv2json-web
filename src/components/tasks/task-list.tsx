@@ -58,7 +58,7 @@ export function TaskList() {
       tasksApi
         .list({
           page,
-          per_page: 10,
+          limit: 10,
         })
         .then((res) => res.data),
     // refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
@@ -154,9 +154,9 @@ export function TaskList() {
           </div>
         </CardHeader>
         <CardContent>
-          {tasksData?.tasks?.length ? (
+          {tasksData?.list?.length ? (
             <div className="space-y-4">
-              {tasksData.tasks.map((task: Task) => (
+              {tasksData.list.map((task: Task) => (
                 <div
                   key={task._id}
                   className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent"
