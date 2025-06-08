@@ -150,7 +150,8 @@ export default function MatchingFormPage() {
       toast.success(
         `Found ${response.data.total_matches} matches in ${response.data.search_time}ms`
       )
-      router.push('/matching')
+      // Redirect to result page with search_id
+      router.push(`/matching/result/${response.data.search_id}`)
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Search failed')
@@ -168,7 +169,8 @@ export default function MatchingFormPage() {
       toast.success(
         `Found ${totalMatches} total matches in ${response.data.total_search_time}ms`
       )
-      router.push('/matching')
+      // Redirect to result page with search_id
+      router.push(`/matching/result/${response.data.search_id}`)
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Bulk search failed')

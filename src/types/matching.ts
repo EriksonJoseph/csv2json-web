@@ -25,6 +25,7 @@ export interface SearchResponse {
   results: SearchResult[]
   total_matches: number
   search_time: number
+  search_id: string
 }
 
 export interface BulkSearchRequest {
@@ -46,6 +47,7 @@ export interface BulkSearchResponse {
   threshold: number
   results: BulkSearchResult[]
   total_search_time: number
+  search_id: string
 }
 
 export interface SearchHistoryItem {
@@ -56,7 +58,7 @@ export interface SearchHistoryItem {
   created_by: string
   query_names: string
   results_found: number
-  search_type: 'bulk' | 'search'
+  search_type: string
   task_id: string
   threshold_used: number
   total_searched: number
@@ -68,4 +70,30 @@ export interface SearchHistoryResponse {
   page: number
   per_page: number
   total_pages: number
+}
+
+export interface FullRecordResponse {
+  _id: string
+  Entity_remark: string
+  Naal_wholename: string
+  task_id: string
+}
+
+export interface MatchedResultResponse {
+  query_name: string
+  matched_record_number: number
+}
+
+export interface MatchingResultResponse {
+  _id: string
+  task_id: string
+  search_type: string
+  query_names: string[]
+  columns_used: string[]
+  threshold_used: number
+  total_query_names: number
+  total_found: number
+  execution_time_ms: number
+  total_rows: number
+  matched_result: MatchedResultResponse[]
 }

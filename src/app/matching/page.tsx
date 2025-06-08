@@ -141,7 +141,9 @@ export default function MatchingPage() {
                         variant="outline"
                         size="sm"
                         className="w-full"
-                        onClick={() => alert('todo view')}
+                        onClick={() =>
+                          router.push(`/matching/result/${history._id}`)
+                        }
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         View

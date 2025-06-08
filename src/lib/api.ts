@@ -31,6 +31,7 @@ import {
   UserStats,
   PaginationParams,
   WatchlistUpdateRequest,
+  MatchingResultResponse,
 } from '@/types'
 
 export const authApi = {
@@ -93,13 +94,20 @@ export const matchingApi = {
     api.get<TaskColumnsResponse>(`/matching/columns/${taskId}`),
 
   search: (data: SearchRequest) =>
-    api.post<SearchResponse>('/matching/search', data),
+    api.post<SearchResponse>('/matching/search', data, {
+      timeout: 300000, // 5 minutes (300,000ms)
+    }),
 
   bulkSearch: (data: BulkSearchRequest) =>
-    api.post<BulkSearchResponse>('/matching/bulk-search', data),
+    api.post<BulkSearchResponse>('/matching/bulk-search', data, {
+      timeout: 600000, // 10 minutes (600,000ms)
+    }),
 
   getHistory: (params?: PaginationParams) =>
     api.get<SearchHistoryResponse>('/matching/history', { params }),
+
+  getResult: (search_id: string) =>
+    api.get<MatchingResultResponse>(`matching/result/${search_id}`),
 }
 
 export const watchlistsApi = {
