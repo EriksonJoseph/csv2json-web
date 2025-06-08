@@ -35,7 +35,7 @@ type TaskForm = z.infer<typeof taskSchema>
 
 interface TaskFormProps {
   taskId?: string
-  mode?: 'create' | 'edit'
+  mode?: 'create' | 'edit' | 'view'
   onSuccess?: () => void
 }
 
@@ -115,6 +115,7 @@ export function TaskForm({
             <Input
               id="topic"
               placeholder="Enter task name"
+              disabled={mode == 'view'}
               {...register('topic')}
               className={errors.topic ? 'border-red-500' : ''}
             />
@@ -130,6 +131,7 @@ export function TaskForm({
                 id="created_file_date"
                 type="date"
                 placeholder="Select start date"
+                disabled={mode == 'view'}
                 {...register('created_file_date')}
                 className={errors.created_file_date ? 'border-red-500' : ''}
               />
@@ -145,6 +147,7 @@ export function TaskForm({
                 id="updated_file_date"
                 type="date"
                 placeholder="Select end date"
+                disabled={mode == 'view'}
                 {...register('updated_file_date')}
                 className={errors.updated_file_date ? 'border-red-500' : ''}
               />
@@ -161,6 +164,7 @@ export function TaskForm({
             <Textarea
               id="references"
               placeholder="Optional description for the task"
+              disabled={mode == 'view'}
               {...register('references')}
             />
           </div>
@@ -180,17 +184,13 @@ export function TaskForm({
           )}
 
           <div className="flex items-center space-x-2 pt-4">
-            <Button type="submit" disabled={isLoading}>
-              <LoadingButton isLoading={isLoading}>
-                {isLoading
-                  ? mode === 'edit'
-                    ? 'Updating...'
-                    : 'Creating...'
-                  : mode === 'edit'
-                    ? 'Update Task'
-                    : 'Create Task'}
-              </LoadingButton>
-            </Button>
+            {mode === 'create' && (
+              <Button type="submit" disabled={isLoading}>
+                <LoadingButton isLoading={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Task'}
+                </LoadingButton>
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"

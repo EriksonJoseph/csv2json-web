@@ -78,7 +78,7 @@ export default function MatchingFormPage() {
     defaultValues: {
       task_id: '',
       name: '',
-      threshold: 0.8,
+      threshold: 0.95,
       columns: [],
     },
   })
@@ -88,7 +88,7 @@ export default function MatchingFormPage() {
     defaultValues: {
       task_id: '',
       list: '',
-      threshold: 0.8,
+      threshold: 0.95,
       columns: [],
     },
   })
@@ -151,10 +151,9 @@ export default function MatchingFormPage() {
       // Transform SearchRequest to SingleSearchRequest for API
       const singleSearchData: SingleSearchRequest = {
         task_id: data.task_id,
-        column_name: data.columns.join(','), // Join multiple columns
-        search_term: data.name,
+        columns: data.columns,
+        name: data.name,
         threshold: data.threshold,
-        limit: 1000, // Default limit
       }
       return matchingApi.search(singleSearchData)
     },

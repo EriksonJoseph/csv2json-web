@@ -17,6 +17,9 @@ import {
   MoreHorizontal,
   Trash2,
   Edit,
+  PersonStandingIcon,
+  Users,
+  User,
 } from 'lucide-react'
 import { Pagination } from '@/components/ui/pagination'
 import {
@@ -200,6 +203,36 @@ export default function TasksPage() {
                         <Eye className="mr-2 h-4 w-4" />
                         View
                       </Button>
+                      {task.is_done_created_doc && !task.error_message && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() =>
+                              router.push(
+                                `/matching/form?task_id=${task._id}&type=single`
+                              )
+                            }
+                          >
+                            <User className="mr-2 h-4 w-4" />
+                            Single
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() =>
+                              router.push(
+                                `/matching/form?task_id=${task._id}&type=bulk`
+                              )
+                            }
+                          >
+                            <Users className="mr-2 h-4 w-4" />
+                            Bluk
+                          </Button>
+                        </>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" size="sm">
@@ -207,39 +240,6 @@ export default function TasksPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              router.push(`/tasks/form/${task._id}?mode=edit`)
-                            }
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          {task.is_done_created_doc && !task.error_message && (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  router.push(
-                                    `/matching/form?task_id=${task._id}&type=single`
-                                  )
-                                }
-                              >
-                                <Search className="mr-2 h-4 w-4" />
-                                Single Matching
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  router.push(
-                                    `/matching/form?task_id=${task._id}&type=bulk`
-                                  )
-                                }
-                              >
-                                <Search className="mr-2 h-4 w-4" />
-                                Bulk Matching
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => deleteMutation.mutate(task._id)}
                             className="text-red-600 dark:text-red-400"

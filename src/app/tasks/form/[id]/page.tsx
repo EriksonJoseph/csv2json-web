@@ -32,7 +32,7 @@ export default function TaskEditPage() {
       </div>
       <TaskForm
         taskId={taskId}
-        mode={mode === 'view' ? 'edit' : 'edit'}
+        mode={mode}
         onSuccess={() => router.push('/tasks')}
       />
     </div>

@@ -12,10 +12,9 @@ export interface SearchRequest {
 
 export interface SingleSearchRequest {
   task_id: string
-  column_name: string
-  search_term: string
+  columns: string[]
+  name: string
   threshold: number
-  limit: number
 }
 
 export interface SearchResult {
