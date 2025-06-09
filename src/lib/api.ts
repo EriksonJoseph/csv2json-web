@@ -52,9 +52,6 @@ export const authApi = {
 export const filesApi = {
   upload: (data: FormData, onProgress?: (progress: number) => void) =>
     api.post<FileItem>('/files/upload', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round(

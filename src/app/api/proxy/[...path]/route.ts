@@ -65,29 +65,41 @@ async function proxyRequest(
     }
 
     const contentType = request.headers.get('content-type')
-    if (contentType) {
-      console.log(`⚪️⚪️⚪️⚪️⚪️ proxy contentType: `, contentType)
-      headers['Content-Type'] = contentType
-    }
 
     // Handle request body
-    let body: string | FormData | undefined
+    let body: string | FormData | ArrayBuffer | undefined
     if (method !== 'GET' && method !== 'DELETE') {
       if (contentType?.includes('multipart/form-data')) {
-        console.log(
-          `⚪️⚪️⚪️⚪️⚪️ proxy contentType is includes multipart/form-data`
-        )
-        body = await request.formData()
-      } else if (contentType?.includes('application/json')) {
-        body = await request.text()
+        // For multipart/form-data, forward the original Content-Type with boundary
+        headers['Content-Type'] = contentType
+        body = await request.arrayBuffer()
+      } else {
+        // For JSON and other content types, forward Content-Type header
+        if (contentType) {
+          headers['Content-Type'] = contentType
+        }
+        if (contentType?.includes('application/json')) {
+          body = await request.text()
+        } else {
+          body = await request.arrayBuffer()
+        }
       }
     }
+
+    // Set timeout based on request type
+    const isFileUpload = contentType?.includes('multipart/form-data')
+    const timeoutMs = isFileUpload ? 600000 : 30000 // 10 minutes for uploads, 30s for others
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
     const response = await fetch(targetUrl, {
       method,
       headers,
       body,
+      signal: controller.signal,
     })
+    clearTimeout(timeoutId)
 
     // Forward response headers
     const responseHeaders = new Headers()
@@ -110,6 +122,10 @@ async function proxyRequest(
       headers: responseHeaders,
     })
   } catch (error) {
+    // Handle timeout and other errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json({ error: 'Request timeout' }, { status: 408 })
+    }
     console.error('Proxy error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
