@@ -6,9 +6,6 @@ const baseURL = '/api/proxy'
 
 export const api = axios.create({
   baseURL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   timeout: 30000,
 })
 
@@ -33,6 +30,16 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // Set Content-Type for JSON requests only, let browser handle FormData
+    if (
+      config.data &&
+      !(config.data instanceof FormData) &&
+      !config.headers['Content-Type']
+    ) {
+      config.headers['Content-Type'] = 'application/json'
+    }
+
     return config
   },
   (error) => {

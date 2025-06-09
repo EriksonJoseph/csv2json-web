@@ -37,6 +37,14 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
       const formData = new FormData()
       formData.append('file', file)
 
+      console.log('🔴 Client FormData entries:')
+      // for (const [key, value] of formData.entries()) {
+      //   console.log(
+      //     `🔴   ${key}:`,
+      //     value instanceof File ? `File(${value.name})` : value
+      //   )
+      // }
+
       return filesApi.upload(formData, (progress) => {
         setUploadingFiles((prev) =>
           prev.map((f) => (f.file === file ? { ...f, progress } : f))

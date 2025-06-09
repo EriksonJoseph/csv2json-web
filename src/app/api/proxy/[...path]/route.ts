@@ -68,11 +68,32 @@ async function proxyRequest(
 
     // Handle request body
     let body: string | FormData | ArrayBuffer | undefined
+    console.log(`🔵 Processing method: ${method}, contentType: ${contentType}`)
+
     if (method !== 'GET' && method !== 'DELETE') {
       if (contentType?.includes('multipart/form-data')) {
-        // For multipart/form-data, forward the original Content-Type with boundary
-        headers['Content-Type'] = contentType
-        body = await request.arrayBuffer()
+        console.log(`🟡 ENTERING multipart/form-data processing`)
+        console.log(`🟡 Original Content-Type:`, contentType)
+
+        try {
+          // Use FormData to preserve multipart structure
+          body = await request.formData()
+          console.log(`🟡 FormData created successfully`)
+          // console.log(`🟡 FormData entries:`)
+          // for (const [key, value] of (body as FormData).entries()) {
+          //   console.log(
+          //     `🟡   ${key}:`,
+          //     value instanceof File
+          //       ? `File(${value.name}, ${value.size} bytes)`
+          //       : value
+          //   )
+          // }
+          // Don't set Content-Type, let fetch handle it with new boundary
+        } catch (error) {
+          console.error(`🔴 Error creating FormData:`, error)
+          body = await request.arrayBuffer()
+          headers['Content-Type'] = contentType
+        }
       } else {
         // For JSON and other content types, forward Content-Type header
         if (contentType) {
@@ -100,6 +121,15 @@ async function proxyRequest(
       signal: controller.signal,
     })
     clearTimeout(timeoutId)
+
+    console.log(`🟢 Backend response status:`, response.status)
+    console.log(`🟢 Backend response ok:`, response.ok)
+
+    // Log error responses for debugging
+    if (!response.ok) {
+      const errorText = await response.clone().text()
+      console.error(`🔴 Backend error ${response.status}:`, errorText)
+    }
 
     // Forward response headers
     const responseHeaders = new Headers()
