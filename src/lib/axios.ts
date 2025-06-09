@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios'
 import toast from 'react-hot-toast'
 import { TokenRefreshResponse } from '@/types'
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL
+const baseURL = '/api/proxy'
 
 export const api = axios.create({
   baseURL,
@@ -70,8 +70,9 @@ api.interceptors.response.use(
           throw new Error('No refresh token available')
         }
 
+        console.log(`🟢🟢🟢🟢🟢 Axios Refreshing token`)
         const response = await axios.post<TokenRefreshResponse>(
-          `${baseURL}/auth/refresh`,
+          '/api/proxy/auth/refresh',
           { refresh_token: refreshToken }
         )
 
