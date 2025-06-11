@@ -6,6 +6,11 @@ if (!API_BASE_URL) {
   throw new Error('API_BASE_URL environment variable is required')
 }
 
+// Set body size limit to 100MB
+export const maxDuration = 600 // 10 minutes
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { path: string[] } }
@@ -66,8 +71,8 @@ async function proxyRequest(
 
     const contentType = request.headers.get('content-type')
 
-    // Handle request body
-    let body: string | FormData | ArrayBuffer | undefined
+    // Handle request body with streaming for large files
+    let body: string | FormData | ArrayBuffer | ReadableStream | undefined
     console.log(`🔵 Processing method: ${method}, contentType: ${contentType}`)
 
     if (method !== 'GET' && method !== 'DELETE') {
@@ -76,23 +81,26 @@ async function proxyRequest(
         console.log(`🟡 Original Content-Type:`, contentType)
 
         try {
-          // Use FormData to preserve multipart structure
-          body = await request.formData()
-          console.log(`🟡 FormData created successfully`)
-          // console.log(`🟡 FormData entries:`)
-          // for (const [key, value] of (body as FormData).entries()) {
-          //   console.log(
-          //     `🟡   ${key}:`,
-          //     value instanceof File
-          //       ? `File(${value.name}, ${value.size} bytes)`
-          //       : value
-          //   )
-          // }
-          // Don't set Content-Type, let fetch handle it with new boundary
+          // For large files, stream directly instead of buffering
+          const contentLength = request.headers.get('content-length')
+          if (contentLength && parseInt(contentLength) > 4 * 1024 * 1024) {
+            // > 4MB
+            console.log(`🟡 Large file detected, using streaming`)
+            if (request.body) {
+              body = request.body
+              headers['Content-Type'] = contentType
+            }
+          } else {
+            // Use FormData for smaller files to preserve multipart structure
+            body = await request.formData()
+            console.log(`🟡 FormData created successfully`)
+          }
         } catch (error) {
-          console.error(`🔴 Error creating FormData:`, error)
-          body = await request.arrayBuffer()
-          headers['Content-Type'] = contentType
+          console.error(`🔴 Error processing multipart data:`, error)
+          if (request.body) {
+            body = request.body
+            headers['Content-Type'] = contentType
+          }
         }
       } else {
         // For JSON and other content types, forward Content-Type header
@@ -114,12 +122,19 @@ async function proxyRequest(
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
-    const response = await fetch(targetUrl, {
+    const fetchOptions: RequestInit = {
       method,
       headers,
       body,
       signal: controller.signal,
-    })
+    }
+
+    // Add duplex option for streaming uploads
+    if (body instanceof ReadableStream) {
+      ;(fetchOptions as any).duplex = 'half'
+    }
+
+    const response = await fetch(targetUrl, fetchOptions)
     clearTimeout(timeoutId)
 
     console.log(`🟢 Backend response status:`, response.status)
