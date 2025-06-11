@@ -20,11 +20,14 @@ import toast from 'react-hot-toast'
 interface UploadingFile {
   file: File
   progress: number
-  status: 'uploading' | 'completed' | 'error'
+  status: 'uploading' | 'processing' | 'completed' | 'failed'
   error?: string
   isChunked?: boolean
   currentChunk?: number
   totalChunks?: number
+  uploadId?: string
+  estimatedTimeLeft?: string
+  startTime?: number
 }
 
 interface FileUploadProps {
@@ -37,30 +40,44 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const CHUNK_SIZE = 3 * 1024 * 1024 // 3MB chunks
-      const isLargeFile = file.size > CHUNK_SIZE
+      const CHUNK_SIZE = 4 * 1024 * 1024 // 4MB chunks
+      const FILE_SIZE_THRESHOLD = 4.5 * 1024 * 1024 // 4.5MB
+      const isLargeFile = file.size > FILE_SIZE_THRESHOLD
 
-      if (isLargeFile) {
-        // Mark as chunked upload
-        setUploadingFiles((prev) =>
-          prev.map((f) =>
-            f.file === file
-              ? {
-                  ...f,
-                  isChunked: true,
-                  totalChunks: Math.ceil(file.size / CHUNK_SIZE),
-                }
-              : f
-          )
+      // Mark file with initial info
+      setUploadingFiles((prev) =>
+        prev.map((f) =>
+          f.file === file
+            ? {
+                ...f,
+                isChunked: isLargeFile,
+                totalChunks: isLargeFile
+                  ? Math.ceil(file.size / CHUNK_SIZE)
+                  : 1,
+                startTime: Date.now(),
+              }
+            : f
         )
-      }
+      )
 
       const result = await ChunkedFileUploader.upload({
         file,
         chunkSize: CHUNK_SIZE,
         onProgress: (progress) => {
           setUploadingFiles((prev) =>
-            prev.map((f) => (f.file === file ? { ...f, progress } : f))
+            prev.map((f) => {
+              if (f.file === file) {
+                // Calculate estimated time left
+                const elapsed = Date.now() - (f.startTime || Date.now())
+                const estimatedTotal = elapsed / (progress / 100)
+                const timeLeft = estimatedTotal - elapsed
+                const estimatedTimeLeft =
+                  timeLeft > 0 ? `${Math.ceil(timeLeft / 1000)}s` : ''
+
+                return { ...f, progress, estimatedTimeLeft }
+              }
+              return f
+            })
           )
         },
         onChunkProgress: (chunkIndex) => {
@@ -70,10 +87,24 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
             )
           )
         },
+        onStatusChange: (status) => {
+          setUploadingFiles((prev) =>
+            prev.map((f) => (f.file === file ? { ...f, status } : f))
+          )
+        },
       })
 
       if (!result.success) {
         throw new Error(result.error || 'Upload failed')
+      }
+
+      // Store upload ID for cancellation
+      if (result.uploadId) {
+        setUploadingFiles((prev) =>
+          prev.map((f) =>
+            f.file === file ? { ...f, uploadId: result.uploadId } : f
+          )
+        )
       }
 
       return { data: result.data }
@@ -96,8 +127,11 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
           f.file === file
             ? {
                 ...f,
-                status: 'error',
-                error: error.response?.data?.message || 'Upload failed',
+                status: 'failed',
+                error:
+                  error.response?.data?.message ||
+                  error.message ||
+                  'Upload failed',
               }
             : f
         )
@@ -127,13 +161,63 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
     onDrop,
     accept: {
       'text/csv': ['.csv'],
+      'text/plain': ['.txt'],
+      'application/json': ['.json'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
     },
     maxSize: 100 * 1024 * 1024, // 100MB
     multiple: false,
+    disabled: uploadMutation.isPending,
   })
 
-  const removeUploadingFile = (file: File) => {
-    setUploadingFiles((prev) => prev.filter((f) => f.file !== file))
+  const cancelUpload = async (uploadingFile: UploadingFile) => {
+    if (uploadingFile.uploadId && uploadingFile.isChunked) {
+      try {
+        await ChunkedFileUploader.cancelUpload(uploadingFile.uploadId)
+        toast.success('Upload cancelled')
+      } catch (error) {
+        console.warn('Failed to cancel upload:', error)
+      }
+    }
+    setUploadingFiles((prev) =>
+      prev.filter((f) => f.file !== uploadingFile.file)
+    )
+  }
+
+  const getStatusText = (uploadingFile: UploadingFile) => {
+    switch (uploadingFile.status) {
+      case 'uploading':
+        if (uploadingFile.isChunked && uploadingFile.totalChunks) {
+          return `Uploading... (${uploadingFile.currentChunk || 1}/${uploadingFile.totalChunks} chunks)`
+        }
+        return 'Uploading...'
+      case 'processing':
+        return 'Processing...'
+      case 'completed':
+        return 'Complete!'
+      case 'failed':
+        return 'Failed'
+      default:
+        return 'Uploading...'
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'uploading':
+        return 'text-blue-600'
+      case 'processing':
+        return 'text-yellow-600'
+      case 'completed':
+        return 'text-green-600'
+      case 'failed':
+        return 'text-red-600'
+      default:
+        return 'text-gray-600'
+    }
   }
 
   return (
@@ -182,46 +266,68 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
               {uploadingFiles.map((uploadingFile, index) => (
                 <div key={index} className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
-                    {uploadingFile.status === 'uploading' && (
+                    {(uploadingFile.status === 'uploading' ||
+                      uploadingFile.status === 'processing') && (
                       <FileText className="h-6 w-6 text-blue-500" />
                     )}
                     {uploadingFile.status === 'completed' && (
                       <CheckCircle className="h-6 w-6 text-green-500" />
                     )}
-                    {uploadingFile.status === 'error' && (
+                    {uploadingFile.status === 'failed' && (
                       <AlertCircle className="h-6 w-6 text-red-500" />
                     )}
                   </div>
 
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-medium">
                           {uploadingFile.file.name}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {formatBytes(uploadingFile.file.size)}
-                          {uploadingFile.isChunked && uploadingFile.totalChunks && (
-                            <span className="ml-2 text-blue-600">
-                              (Chunk {uploadingFile.currentChunk || 1}/{uploadingFile.totalChunks})
-                            </span>
-                          )}
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-500">
+                            {formatBytes(uploadingFile.file.size)}
+                            {uploadingFile.estimatedTimeLeft && (
+                              <span className="ml-2 text-blue-600">
+                                ~{uploadingFile.estimatedTimeLeft} left
+                              </span>
+                            )}
+                          </p>
+                          <p
+                            className={`text-xs font-medium ${getStatusColor(uploadingFile.status)}`}
+                          >
+                            {getStatusText(uploadingFile)}
+                          </p>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeUploadingFile(uploadingFile.file)}
+                        onClick={() => cancelUpload(uploadingFile)}
+                        disabled={uploadingFile.status === 'completed'}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    {uploadingFile.status === 'uploading' && (
-                      <Progress value={uploadingFile.progress} />
+                    {(uploadingFile.status === 'uploading' ||
+                      uploadingFile.status === 'processing') && (
+                      <div className="space-y-1">
+                        <Progress value={uploadingFile.progress} />
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{Math.round(uploadingFile.progress)}%</span>
+                          {uploadingFile.isChunked &&
+                            uploadingFile.totalChunks && (
+                              <span>
+                                Chunk {uploadingFile.currentChunk || 1} of{' '}
+                                {uploadingFile.totalChunks}
+                              </span>
+                            )}
+                        </div>
+                      </div>
                     )}
 
-                    {uploadingFile.status === 'error' &&
+                    {uploadingFile.status === 'failed' &&
                       uploadingFile.error && (
                         <p className="text-xs text-red-500">
                           {uploadingFile.error}
@@ -229,7 +335,9 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
                       )}
 
                     {uploadingFile.status === 'completed' && (
-                      <p className="text-xs text-green-600">Upload completed</p>
+                      <p className="text-xs text-green-600">
+                        Upload completed successfully!
+                      </p>
                     )}
                   </div>
                 </div>
