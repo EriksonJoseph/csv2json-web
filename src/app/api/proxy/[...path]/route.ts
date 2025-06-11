@@ -7,7 +7,7 @@ if (!API_BASE_URL) {
 }
 
 // Set body size limit to 100MB
-export const maxDuration = 600 // 10 minutes
+export const maxDuration = 60 // 60 seconds (Vercel Hobby plan limit)
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
@@ -117,7 +117,7 @@ async function proxyRequest(
 
     // Set timeout based on request type
     const isFileUpload = contentType?.includes('multipart/form-data')
-    const timeoutMs = isFileUpload ? 600000 : 30000 // 10 minutes for uploads, 30s for others
+    const timeoutMs = isFileUpload ? 60000 : 30000 // 60s for uploads, 30s for others (Vercel Hobby limit)
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs)

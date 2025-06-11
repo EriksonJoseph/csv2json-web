@@ -175,7 +175,7 @@ export class ChunkedFileUploader {
               `/files/chunked/${uploadId}/chunk`,
               formData,
               {
-                timeout: 600000,
+                timeout: 60000, // 60 seconds for Vercel Hobby plan
                 onUploadProgress: (progressEvent) => {
                   if (progressEvent.total) {
                     const chunkProgress = Math.round(

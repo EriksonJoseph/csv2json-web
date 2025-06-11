@@ -50,7 +50,7 @@ export const authApi = {
 export const filesApi = {
   upload: (data: FormData, onProgress?: (progress: number) => void) =>
     api.post<FileItem>('/files/upload', data, {
-      timeout: 600000, // 10 minutes for file uploads
+      timeout: 60000, // 60 seconds for Vercel Hobby plan
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round(
