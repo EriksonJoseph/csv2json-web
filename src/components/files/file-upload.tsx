@@ -13,8 +13,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Upload, FileText, X, CheckCircle, AlertCircle } from 'lucide-react'
-import { filesApi } from '@/lib/api'
 import { formatBytes } from '@/lib/utils'
+import { ChunkedFileUploader } from '@/lib/chunked-upload'
 import toast from 'react-hot-toast'
 
 interface UploadingFile {
@@ -22,6 +22,9 @@ interface UploadingFile {
   progress: number
   status: 'uploading' | 'completed' | 'error'
   error?: string
+  isChunked?: boolean
+  currentChunk?: number
+  totalChunks?: number
 }
 
 interface FileUploadProps {
@@ -34,22 +37,46 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData()
-      formData.append('file', file)
+      const CHUNK_SIZE = 3 * 1024 * 1024 // 3MB chunks
+      const isLargeFile = file.size > CHUNK_SIZE
 
-      console.log('🔴 Client FormData entries:')
-      // for (const [key, value] of formData.entries()) {
-      //   console.log(
-      //     `🔴   ${key}:`,
-      //     value instanceof File ? `File(${value.name})` : value
-      //   )
-      // }
-
-      return filesApi.upload(formData, (progress) => {
+      if (isLargeFile) {
+        // Mark as chunked upload
         setUploadingFiles((prev) =>
-          prev.map((f) => (f.file === file ? { ...f, progress } : f))
+          prev.map((f) =>
+            f.file === file
+              ? {
+                  ...f,
+                  isChunked: true,
+                  totalChunks: Math.ceil(file.size / CHUNK_SIZE),
+                }
+              : f
+          )
         )
+      }
+
+      const result = await ChunkedFileUploader.upload({
+        file,
+        chunkSize: CHUNK_SIZE,
+        onProgress: (progress) => {
+          setUploadingFiles((prev) =>
+            prev.map((f) => (f.file === file ? { ...f, progress } : f))
+          )
+        },
+        onChunkProgress: (chunkIndex) => {
+          setUploadingFiles((prev) =>
+            prev.map((f) =>
+              f.file === file ? { ...f, currentChunk: chunkIndex + 1 } : f
+            )
+          )
+        },
       })
+
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed')
+      }
+
+      return { data: result.data }
     },
     onSuccess: (data, file) => {
       setUploadingFiles((prev) =>
@@ -174,6 +201,11 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
                         </p>
                         <p className="text-xs text-gray-500">
                           {formatBytes(uploadingFile.file.size)}
+                          {uploadingFile.isChunked && uploadingFile.totalChunks && (
+                            <span className="ml-2 text-blue-600">
+                              (Chunk {uploadingFile.currentChunk || 1}/{uploadingFile.totalChunks})
+                            </span>
+                          )}
                         </p>
                       </div>
                       <Button
