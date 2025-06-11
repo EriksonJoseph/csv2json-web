@@ -6,14 +6,12 @@ import {
   TokenRefreshRequest,
   User,
   FileItem,
-  FileUploadRequest,
   FileListResponse,
   Task,
   TaskCreateRequest,
   TaskListResponse,
   CurrentProcessingTask,
   TaskColumnsResponse,
-  SearchRequest,
   SingleSearchRequest,
   SearchResponse,
   BulkSearchRequest,
@@ -52,6 +50,7 @@ export const authApi = {
 export const filesApi = {
   upload: (data: FormData, onProgress?: (progress: number) => void) =>
     api.post<FileItem>('/files/upload', data, {
+      timeout: 600000, // 10 minutes for file uploads
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round(
