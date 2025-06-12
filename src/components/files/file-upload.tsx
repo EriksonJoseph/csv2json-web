@@ -32,9 +32,19 @@ interface UploadingFile {
 
 interface FileUploadProps {
   afterSuccess?: (data: any) => void
+  onClearFile?: () => void
+  uploadedFile?: any
+  maxFiles?: number
+  maxSize?: number
 }
 
-export function FileUpload({ afterSuccess }: FileUploadProps) {
+export function FileUpload({
+  afterSuccess,
+  onClearFile,
+  uploadedFile,
+  maxFiles = 5,
+  maxSize = 100 * 1024 * 1024, // 100MB default
+}: FileUploadProps) {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([])
   const queryClient = useQueryClient()
 
@@ -142,6 +152,28 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      // Check file size limit
+      const oversizedFiles = acceptedFiles.filter((file) => file.size > maxSize)
+      if (oversizedFiles.length > 0) {
+        toast.error(`File size must not exceed ${formatBytes(maxSize)}`)
+        return
+      }
+
+      // Check max files limit
+      const totalFiles = uploadingFiles.length + acceptedFiles.length
+      if (totalFiles > maxFiles) {
+        toast.error(
+          `Maximum ${maxFiles} file${maxFiles > 1 ? 's' : ''} allowed`
+        )
+        return
+      }
+
+      // If single file mode and already has a file, prevent new upload
+      if (maxFiles === 1 && uploadingFiles.length > 0) {
+        toast.error('Please remove the current file before uploading a new one')
+        return
+      }
+
       const newUploadingFiles = acceptedFiles.map((file) => ({
         file,
         progress: 0,
@@ -154,22 +186,16 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
         uploadMutation.mutate(file)
       })
     },
-    [uploadMutation]
+    [uploadMutation, maxFiles, maxSize, uploadingFiles.length]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'text/csv': ['.csv'],
-      'text/plain': ['.txt'],
-      'application/json': ['.json'],
-      'application/vnd.ms-excel': ['.xls'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
-        '.xlsx',
-      ],
     },
-    maxSize: 100 * 1024 * 1024, // 100MB
-    multiple: false,
+    maxSize: maxSize,
+    multiple: maxFiles > 1,
     disabled: uploadMutation.isPending,
   })
 
@@ -185,6 +211,11 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
     setUploadingFiles((prev) =>
       prev.filter((f) => f.file !== uploadingFile.file)
     )
+
+    // Clear file ID if this was the uploaded file
+    if (uploadingFile.status === 'completed' && onClearFile) {
+      onClearFile()
+    }
   }
 
   const getStatusText = (uploadingFile: UploadingFile) => {
@@ -248,7 +279,11 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
                   Drag & drop files here, or click to select
                 </p>
                 <p className="text-sm text-gray-500">
-                  Supports CSV, Excel, TXT, JSON files up to 100MB
+                  Supports CSV, Excel, TXT, JSON files up to{' '}
+                  {formatBytes(maxSize)}
+                  {maxFiles === 1
+                    ? ' (1 file only)'
+                    : ` (max ${maxFiles} files)`}
                 </p>
               </div>
             )}
@@ -304,7 +339,12 @@ export function FileUpload({ afterSuccess }: FileUploadProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => cancelUpload(uploadingFile)}
-                        disabled={uploadingFile.status === 'completed'}
+                        disabled={false}
+                        title={
+                          uploadingFile.status === 'completed'
+                            ? 'Remove file'
+                            : 'Cancel upload'
+                        }
                       >
                         <X className="h-4 w-4" />
                       </Button>

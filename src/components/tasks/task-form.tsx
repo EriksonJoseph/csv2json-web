@@ -21,8 +21,9 @@ import { TaskCreateRequest, Task } from '@/types'
 import toast from 'react-hot-toast'
 import { FileUpload } from '@/components/files/file-upload'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
+// #region จัดการ
 const taskSchema = z.object({
   topic: z.string().min(1, 'Task name is required'),
   created_file_date: z.string().min(1, 'Create file date is required'),
@@ -32,6 +33,7 @@ const taskSchema = z.object({
 })
 
 type TaskForm = z.infer<typeof taskSchema>
+// #endregion
 
 interface TaskFormProps {
   taskId?: string
@@ -94,14 +96,27 @@ export function TaskForm({
   })
 
   const onSubmit = async (data: TaskForm) => {
+    if (!data.file_id) {
+      toast.error('Please upload a file to get file ID before creating task')
+      return
+    }
+
     if (mode === 'edit') {
     } else {
       createMutation.mutate(data)
     }
   }
 
+  const [uploadedFile, setUploadedFile] = useState<any>(null)
+
   const setFileId = (data: any) => {
     setValue('file_id', data._id)
+    setUploadedFile(data)
+  }
+
+  const clearFile = () => {
+    setValue('file_id', '')
+    setUploadedFile(null)
   }
 
   const isLoading = createMutation.isPending
@@ -173,14 +188,23 @@ export function TaskForm({
             <Label htmlFor="file_id">File ID</Label>
             <Input
               id="file_id"
-              placeholder="Enter file ID"
+              placeholder="File ID will appear after upload"
               {...register('file_id')}
               disabled
             />
+            {errors.file_id && (
+              <p className="text-sm text-red-500">{errors.file_id.message}</p>
+            )}
           </div>
 
           {mode === 'create' && (
-            <FileUpload afterSuccess={(data) => setFileId(data)} />
+            <FileUpload
+              afterSuccess={(data) => setFileId(data)}
+              onClearFile={clearFile}
+              uploadedFile={uploadedFile}
+              maxFiles={1}
+              maxSize={25 * 1024 * 1024} // 25MB
+            />
           )}
 
           <div className="flex items-center space-x-2 pt-4">

@@ -5,7 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production  
+- `npm run build` - Build for production
+- `npm run start` - Start production server
 - `npm run lint` - Run ESLint checks
 - `npm run lint:fix` - Fix ESLint issues automatically
 - `npm run type-check` - Run TypeScript type checking
@@ -14,81 +15,138 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-### API Proxy Pattern
-This application uses API Routes as Proxy (`/src/app/api/proxy/[...path]/route.ts`) to forward requests to a backend HTTP server. This solves mixed content issues when deploying HTTPS frontend with HTTP backend.
+### Framework & Tooling
+- **Next.js 14.2.5** with App Router architecture
+- **TypeScript** with strict mode enabled
+- **Tailwind CSS** for styling with custom design system
+- **Shadcn/UI** components built on Radix UI primitives
+- **ESLint + Prettier** for code quality and formatting
 
+### API Proxy Pattern
+This application uses API Routes as Proxy (`/src/app/api/proxy/[...path]/route.ts`) to forward requests to a backend HTTP server. This pattern solves mixed content issues when deploying HTTPS frontend with HTTP backend.
+
+**Key Features:**
 - Client calls `/api/proxy/*` instead of direct backend URLs
-- Proxy forwards all HTTP methods (GET, POST, PUT, DELETE, PATCH) to backend
-- Special handling for `multipart/form-data` file uploads to preserve boundaries
+- Forwards all HTTP methods (GET, POST, PUT, DELETE, PATCH) to backend
+- Special handling for `multipart/form-data` file uploads with streaming support
+- Large file support (>4MB) with streaming to prevent memory issues
+- Configurable timeouts: 60s for uploads, 30s for regular requests
 - Environment variable `API_BASE_URL` (server-side) specifies backend URL
+- Request/response header forwarding with security considerations
 
 ### Authentication Flow
-JWT-based authentication with automatic token refresh:
+JWT-based authentication with automatic token refresh and dual storage:
 
-- Access tokens stored in localStorage and HTTP-only cookies
-- Refresh tokens handle automatic token renewal via axios interceptors
-- Auth state managed by Zustand store with persistence
-- Middleware protects routes and redirects based on auth status
-- Force logout on 403 errors via auth store `forceLogout()`
+- **Token Storage**: localStorage (client-side) + HTTP-only cookies (server-side)
+- **Automatic Refresh**: Axios interceptors handle 401 errors and token renewal
+- **State Management**: Zustand store with persistence and hydration
+- **Route Protection**: Next.js middleware protects routes based on auth status
+- **Error Handling**: 403 errors trigger force logout via `forceLogout()`
+- **Session Management**: Automatic redirect to login on auth failures
 
-### State Management Pattern
-- **Zustand**: Global state (auth, UI preferences)
-- **TanStack Query**: Server state, caching, and synchronization
-- **React Hook Form + Zod**: Form state and validation
-- Local component state for UI-only concerns
+### State Management Architecture
+- **Zustand**: Global state (auth, UI preferences) with persistence
+- **TanStack Query v5**: Server state, caching, background updates, and optimistic updates
+- **React Hook Form + Zod**: Form state management and validation
+- **Local State**: Component-specific UI state (modals, toggles, etc.)
 
 ### File Upload Architecture
-File uploads use FormData with progress tracking:
+Advanced file upload system with progress tracking and error handling:
 
-- Client: Remove explicit `Content-Type` header, let browser set boundary
-- Proxy: Use `arrayBuffer()` to preserve multipart boundaries
-- Progress tracking via axios `onUploadProgress` callback
-- File status tracking through task system
+- **FormData Processing**: Browser sets multipart boundaries automatically
+- **Progress Tracking**: Real-time upload progress via axios `onUploadProgress`
+- **Large File Support**: Streaming for files >4MB to prevent memory issues
+- **Timeout Handling**: Extended timeouts for file operations (60s)
+- **Error Recovery**: Graceful fallback for upload failures
+- **Task Integration**: File status tracking through task system
 
 ### Type System
-Centralized TypeScript definitions in `/src/types/`:
+Comprehensive TypeScript definitions organized by domain in `/src/types/`:
 
-- `auth.ts` - Authentication and user types
-- `files.ts` - File management types  
-- `tasks.ts` - Processing task types
-- `matching.ts` - Fuzzy matching and search types
-- `common.ts` - Shared utility types
+- `auth.ts` - Authentication, user types, and auth responses
+- `files.ts` - File management, upload, and download types
+- `tasks.ts` - Processing tasks, creation, and status types
+- `matching.ts` - Fuzzy matching, search, and result types
+- `watchlists.ts` - Watchlist management and matching types
+- `users.ts` - User profiles, activity, and statistics types
+- `common.ts` - Shared utility types and pagination
 
 ### Component Organization
-- `/src/components/ui/` - Base Shadcn/UI components
-- `/src/components/layout/` - App layout and navigation
-- Feature-specific components grouped by domain (auth, files, tasks, matching)
-- Reusable business logic extracted to custom hooks in `/src/hooks/`
+- `/src/components/ui/` - Base Shadcn/UI components (buttons, inputs, etc.)
+- `/src/components/layout/` - App layout, navigation, and shell components
+- `/src/components/theme-provider.tsx` - Dark/light theme management
+- `/src/components/query-provider.tsx` - TanStack Query configuration
+- Feature-specific components grouped by domain:
+  - `auth/` - Login, register, and authentication forms
+  - `files/` - File upload, listing, and management
+  - `tasks/` - Task creation, listing, and management
+  - `matching/` - Search functionality and result display
+  - `watchlists/` - Watchlist management and matching
+  - `profile/` - User profile and settings
+  - `dashboard/` - Dashboard and analytics components
 
 ## Environment Variables
 
 ### Development (.env.local)
-```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api  # Not used with proxy
-API_BASE_URL=http://localhost:8000/api              # Backend URL for proxy
+```bash
+# Client-side API base URL (not used with proxy)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+
+# Server-side backend URL for proxy forwarding
+API_BASE_URL=http://localhost:8000/api
+
+# Application metadata
 NEXT_PUBLIC_APP_NAME=CSV2JSON Web
 NEXT_PUBLIC_APP_VERSION=1.0.0
 ```
 
 ### Production (Vercel)
-- `API_BASE_URL` - Backend server URL (server-side only)
-- Public variables same as development
+- `API_BASE_URL` - Backend server URL (server-side only, required)
+- `NEXT_PUBLIC_APP_NAME` - Application name for branding
+- `NEXT_PUBLIC_APP_VERSION` - Version displayed in UI
 
-## Key Patterns
+## Key Patterns & Best Practices
 
-### API Client Structure
-- `/src/lib/axios.ts` - Configured axios instance with interceptors
-- `/src/lib/api.ts` - Typed API client functions organized by domain
-- All API calls go through centralized client for consistent error handling
+### API Client Architecture
+- **Centralized Client**: `/src/lib/axios.ts` - Configured axios instance with interceptors
+- **Domain Organization**: `/src/lib/api.ts` - API functions grouped by feature domain
+- **Consistent Error Handling**: All API calls use centralized error handling
+- **Request Interceptors**: Automatic authorization header injection
+- **Response Interceptors**: Token refresh and error handling
 
-### Error Handling
-- Axios interceptors handle 401 (token refresh) and 403 (force logout)
-- React Query handles loading states and error boundaries
-- Toast notifications for user-facing errors
-- Console logging for debugging
+### Error Handling Strategy
+- **Axios Interceptors**: Handle 401 (refresh) and 403 (logout) automatically
+- **React Query**: Built-in loading states, error boundaries, and retry logic
+- **Toast Notifications**: User-friendly error messages via react-hot-toast
+- **Console Logging**: Detailed debugging information for development
+- **Graceful Degradation**: Fallback states for network failures
 
 ### Performance Optimizations
-- Route-based code splitting via Next.js App Router
-- Virtualized lists for large datasets (react-window)
-- Image optimization through Next.js
-- React Query caching strategies
+- **Code Splitting**: Route-based splitting via Next.js App Router
+- **Virtualization**: react-window for large datasets and file lists
+- **Image Optimization**: Next.js built-in image optimization
+- **Query Caching**: TanStack Query caching with 60s stale time
+- **Background Updates**: Automatic data synchronization
+- **Lazy Loading**: Dynamic imports for heavy components
+
+### UI/UX Patterns
+- **Design System**: Consistent theming with CSS custom properties
+- **Dark Mode**: System preference detection with manual toggle
+- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+- **Loading States**: Skeleton screens and progress indicators
+- **Infinite Scrolling**: Pagination with react-intersection-observer
+- **Accessibility**: ARIA labels and keyboard navigation support
+
+### Security Considerations
+- **Route Protection**: Middleware-based authentication checks
+- **Token Management**: Secure storage and automatic refresh
+- **Input Validation**: Zod schemas for form validation
+- **CSRF Protection**: Implicit via SameSite cookie settings
+- **Content Security**: Proxy pattern prevents direct backend exposure
+
+### Development Workflow
+- **Type Safety**: Strict TypeScript configuration
+- **Code Quality**: ESLint with TypeScript and Prettier integration
+- **Import Organization**: Absolute imports with path mapping
+- **Component Testing**: Structured for easy testing setup
+- **Hot Reloading**: Fast development with Next.js dev server
