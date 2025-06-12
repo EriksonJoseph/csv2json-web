@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
   Search,
@@ -16,8 +15,6 @@ import {
   XCircle,
   MoreHorizontal,
   Trash2,
-  Edit,
-  PersonStandingIcon,
   Users,
   User,
 } from 'lucide-react'
@@ -26,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { tasksApi } from '@/lib/api'
@@ -36,11 +32,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 
 export default function TasksPage() {
+  // #region Hook
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(9)
   const router = useRouter()
   const queryClient = useQueryClient()
+  // #endregion
 
   // #region API
   const { data: tasksData, isLoading } = useQuery({
@@ -55,7 +53,6 @@ export default function TasksPage() {
     },
     refetchInterval: 5000,
   })
-  // #endregion
 
   const deleteMutation = useMutation({
     mutationFn: (taskId: string) => tasksApi.delete(taskId),
@@ -67,7 +64,9 @@ export default function TasksPage() {
       toast.error(error.response?.data?.message || 'Failed to delete task')
     },
   })
+  // #endregion
 
+  // #region get display element
   const getStatusIcon = (
     is_done_created_doc: boolean,
     error_message: string | undefined
@@ -107,6 +106,7 @@ export default function TasksPage() {
       </Badge>
     )
   }
+  // #endregion
 
   if (isLoading) {
     return (
@@ -145,7 +145,8 @@ export default function TasksPage() {
 
       <Card>
         <CardHeader>
-          <div className="relative">
+          {/* implement search later */}
+          {/* <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
               placeholder="Search tasks..."
@@ -153,7 +154,7 @@ export default function TasksPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10"
             />
-          </div>
+          </div> */}
         </CardHeader>
         <CardContent>
           {tasksData?.list?.length ? (
@@ -191,11 +192,11 @@ export default function TasksPage() {
                         )}
                       </div>
                     </CardContent>
-                    <CardFooter className="flex items-center justify-between space-x-2">
+                    <CardFooter className="flex items-center justify-between space-x-2 p-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1"
+                        className="hidden flex-1 xl:flex"
                         onClick={() =>
                           router.push(`/tasks/form/${task._id}?mode=view`)
                         }
@@ -207,7 +208,7 @@ export default function TasksPage() {
                         <>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="icon"
                             className="flex-1"
                             onClick={() =>
                               router.push(
@@ -240,6 +241,15 @@ export default function TasksPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            className="xl:hidden"
+                            onClick={() =>
+                              router.push(`/tasks/form/${task._id}?mode=view`)
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => deleteMutation.mutate(task._id)}
                             className="text-red-600 dark:text-red-400"
