@@ -14,8 +14,10 @@ import {
   TaskColumnsResponse,
   SingleSearchRequest,
   SearchResponse,
+  AsyncSearchResponse,
   BulkSearchRequest,
   BulkSearchResponse,
+  AsyncBulkSearchResponse,
   SearchHistoryResponse,
   Watchlist,
   WatchlistCreateRequest,
@@ -91,14 +93,17 @@ export const matchingApi = {
     api.get<TaskColumnsResponse>(`/matching/columns/${taskId}`),
 
   search: (data: SingleSearchRequest) =>
-    api.post<SearchResponse>('/matching/search', data, {
-      timeout: 300000, // 5 minutes (300,000ms)
+    api.post<AsyncSearchResponse>('/matching/search', data, {
+      timeout: 30000, // 30 seconds for async submission
     }),
 
   bulkSearch: (data: BulkSearchRequest) =>
-    api.post<BulkSearchResponse>('/matching/bulk-search', data, {
-      timeout: 600000, // 10 minutes (600,000ms)
+    api.post<AsyncBulkSearchResponse>('/matching/bulk-search', data, {
+      timeout: 30000, // 30 seconds for async submission
     }),
+
+  getSearchStatus: (search_id: string) =>
+    api.get<MatchingResultResponse>(`/matching/search-result/${search_id}`),
 
   getHistory: (params?: PaginationParams) =>
     api.get<SearchHistoryResponse>('/matching/history', { params }),

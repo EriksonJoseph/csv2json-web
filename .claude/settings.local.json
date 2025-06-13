@@ -4,7 +4,9 @@
       "Bash(yarn build)",
       "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run lint:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": []
   }

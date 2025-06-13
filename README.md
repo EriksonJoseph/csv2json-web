@@ -5,12 +5,14 @@ A modern web application built with Next.js 14 for CSV to JSON conversion and ad
 ## Features
 
 ### 🔐 Authentication
+
 - JWT-based authentication with access & refresh tokens
 - User registration and login
 - Automatic token refresh
 - Protected routes with middleware
 
 ### 📁 File Management
+
 - Drag & drop file upload
 - Support for CSV, Excel, TXT, and JSON files
 - File status tracking (pending, processing, completed, failed)
@@ -18,12 +20,14 @@ A modern web application built with Next.js 14 for CSV to JSON conversion and ad
 - Progress tracking for uploads
 
 ### ⚙️ Task Management
+
 - Create processing tasks for uploaded files
 - Real-time task status updates
 - Task progress monitoring
 - Error handling and reporting
 
 ### 🔍 Fuzzy Matching System
+
 - Single search with configurable similarity threshold
 - Bulk search for multiple terms
 - File upload support for bulk search terms
@@ -31,12 +35,14 @@ A modern web application built with Next.js 14 for CSV to JSON conversion and ad
 - Real-time search performance metrics
 
 ### 📊 Dashboard
+
 - Overview of files, tasks, and searches
 - Recent activity tracking
 - System status indicators
 - Quick actions and navigation
 
 ### 🎨 Modern UI/UX
+
 - Dark/Light mode toggle
 - Responsive design (mobile-first)
 - Loading states and skeleton loaders
@@ -97,6 +103,7 @@ src/
 The application integrates with a backend API running on `http://localhost:8000/api` with the following endpoints:
 
 ### Authentication
+
 - `POST /auth/login` - User login
 - `POST /auth/register` - User registration
 - `POST /auth/refresh` - Token refresh
@@ -104,6 +111,7 @@ The application integrates with a backend API running on `http://localhost:8000/
 - `GET /auth/me` - Get current user
 
 ### Files
+
 - `POST /files/upload` - Upload file
 - `GET /files` - List files with pagination
 - `GET /files/{id}` - Get file details
@@ -111,6 +119,7 @@ The application integrates with a backend API running on `http://localhost:8000/
 - `DELETE /files/{id}` - Delete file
 
 ### Tasks
+
 - `POST /task` - Create task
 - `GET /task` - List tasks
 - `GET /task/{id}` - Get task details
@@ -118,6 +127,7 @@ The application integrates with a backend API running on `http://localhost:8000/
 - `GET /task/current-processing` - Get currently processing task
 
 ### Matching
+
 - `GET /matching/columns/{task_id}` - Get task columns
 - `POST /matching/search` - Single search
 - `POST /matching/bulk-search` - Bulk search
@@ -126,12 +136,14 @@ The application integrates with a backend API running on `http://localhost:8000/
 ## Installation & Setup
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Environment Configuration**
    Create a `.env.local` file with:
+
    ```
    NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
    NEXT_PUBLIC_APP_NAME=CSV2JSON Web
@@ -139,6 +151,7 @@ The application integrates with a backend API running on `http://localhost:8000/
    ```
 
 3. **Start Development Server**
+
    ```bash
    npm run dev
    ```
@@ -163,22 +176,26 @@ The application integrates with a backend API running on `http://localhost:8000/
 ## Development Guidelines
 
 ### Code Style
+
 - Follow TypeScript best practices
 - Use ESLint and Prettier for code formatting
 - Implement proper error boundaries
 - Write descriptive component and function names
 
 ### State Management
+
 - Use Zustand for global state
 - Use React Query for server state
 - Keep component state local when possible
 
 ### API Integration
+
 - All API calls should go through the centralized API client
 - Implement proper error handling
 - Use React Query for caching and synchronization
 
 ### UI/UX
+
 - Follow the established design system
 - Implement proper loading states
 - Provide clear user feedback

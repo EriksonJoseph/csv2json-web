@@ -183,13 +183,15 @@ export default function TasksPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="text-sm text-muted-foreground">
+                      <div className="space-y-1 text-sm text-muted-foreground">
                         <p>Created: {formatRelativeTime(task.created_at)}</p>
                         {task.error_message && (
                           <p className="mt-1 text-red-500">
                             Error: {task.error_message}
                           </p>
                         )}
+                        <p>Total Columns: {task.total_columns || '-'}</p>
+                        <p>Total rows: {task.total_rows || '-'}</p>
                       </div>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between space-x-2 p-2">

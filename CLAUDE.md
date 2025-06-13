@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture Overview
 
 ### Framework & Tooling
+
 - **Next.js 14.2.5** with App Router architecture
 - **TypeScript** with strict mode enabled
 - **Tailwind CSS** for styling with custom design system
@@ -23,9 +24,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **ESLint + Prettier** for code quality and formatting
 
 ### API Proxy Pattern
+
 This application uses API Routes as Proxy (`/src/app/api/proxy/[...path]/route.ts`) to forward requests to a backend HTTP server. This pattern solves mixed content issues when deploying HTTPS frontend with HTTP backend.
 
 **Key Features:**
+
 - Client calls `/api/proxy/*` instead of direct backend URLs
 - Forwards all HTTP methods (GET, POST, PUT, DELETE, PATCH) to backend
 - Special handling for `multipart/form-data` file uploads with streaming support
@@ -35,6 +38,7 @@ This application uses API Routes as Proxy (`/src/app/api/proxy/[...path]/route.t
 - Request/response header forwarding with security considerations
 
 ### Authentication Flow
+
 JWT-based authentication with automatic token refresh and dual storage:
 
 - **Token Storage**: localStorage (client-side) + HTTP-only cookies (server-side)
@@ -45,12 +49,14 @@ JWT-based authentication with automatic token refresh and dual storage:
 - **Session Management**: Automatic redirect to login on auth failures
 
 ### State Management Architecture
+
 - **Zustand**: Global state (auth, UI preferences) with persistence
 - **TanStack Query v5**: Server state, caching, background updates, and optimistic updates
 - **React Hook Form + Zod**: Form state management and validation
 - **Local State**: Component-specific UI state (modals, toggles, etc.)
 
 ### File Upload Architecture
+
 Advanced file upload system with progress tracking and error handling:
 
 - **FormData Processing**: Browser sets multipart boundaries automatically
@@ -61,6 +67,7 @@ Advanced file upload system with progress tracking and error handling:
 - **Task Integration**: File status tracking through task system
 
 ### Type System
+
 Comprehensive TypeScript definitions organized by domain in `/src/types/`:
 
 - `auth.ts` - Authentication, user types, and auth responses
@@ -72,6 +79,7 @@ Comprehensive TypeScript definitions organized by domain in `/src/types/`:
 - `common.ts` - Shared utility types and pagination
 
 ### Component Organization
+
 - `/src/components/ui/` - Base Shadcn/UI components (buttons, inputs, etc.)
 - `/src/components/layout/` - App layout, navigation, and shell components
 - `/src/components/theme-provider.tsx` - Dark/light theme management
@@ -88,6 +96,7 @@ Comprehensive TypeScript definitions organized by domain in `/src/types/`:
 ## Environment Variables
 
 ### Development (.env.local)
+
 ```bash
 # Client-side API base URL (not used with proxy)
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
@@ -101,6 +110,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 ```
 
 ### Production (Vercel)
+
 - `API_BASE_URL` - Backend server URL (server-side only, required)
 - `NEXT_PUBLIC_APP_NAME` - Application name for branding
 - `NEXT_PUBLIC_APP_VERSION` - Version displayed in UI
@@ -108,6 +118,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 ## Key Patterns & Best Practices
 
 ### API Client Architecture
+
 - **Centralized Client**: `/src/lib/axios.ts` - Configured axios instance with interceptors
 - **Domain Organization**: `/src/lib/api.ts` - API functions grouped by feature domain
 - **Consistent Error Handling**: All API calls use centralized error handling
@@ -115,6 +126,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Response Interceptors**: Token refresh and error handling
 
 ### Error Handling Strategy
+
 - **Axios Interceptors**: Handle 401 (refresh) and 403 (logout) automatically
 - **React Query**: Built-in loading states, error boundaries, and retry logic
 - **Toast Notifications**: User-friendly error messages via react-hot-toast
@@ -122,6 +134,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Graceful Degradation**: Fallback states for network failures
 
 ### Performance Optimizations
+
 - **Code Splitting**: Route-based splitting via Next.js App Router
 - **Virtualization**: react-window for large datasets and file lists
 - **Image Optimization**: Next.js built-in image optimization
@@ -130,6 +143,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Lazy Loading**: Dynamic imports for heavy components
 
 ### UI/UX Patterns
+
 - **Design System**: Consistent theming with CSS custom properties
 - **Dark Mode**: System preference detection with manual toggle
 - **Responsive Design**: Mobile-first approach with Tailwind breakpoints
@@ -138,6 +152,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Accessibility**: ARIA labels and keyboard navigation support
 
 ### Security Considerations
+
 - **Route Protection**: Middleware-based authentication checks
 - **Token Management**: Secure storage and automatic refresh
 - **Input Validation**: Zod schemas for form validation
@@ -145,6 +160,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Content Security**: Proxy pattern prevents direct backend exposure
 
 ### Development Workflow
+
 - **Type Safety**: Strict TypeScript configuration
 - **Code Quality**: ESLint with TypeScript and Prettier integration
 - **Import Organization**: Absolute imports with path mapping

@@ -26,6 +26,8 @@ interface MultiSelectProps {
   placeholder?: string
   className?: string
   disabled?: boolean
+  loading?: boolean
+  maxSelections?: number
 }
 
 export function MultiSelect({
@@ -35,6 +37,8 @@ export function MultiSelect({
   placeholder = 'Select items...',
   className,
   disabled = false,
+  loading = false,
+  maxSelections,
 }: MultiSelectProps) {
   const [searchTerm, setSearchTerm] = React.useState('')
   const [open, setOpen] = React.useState(false)
@@ -48,6 +52,9 @@ export function MultiSelect({
     if (selected.includes(item)) {
       handleUnselect(item)
     } else {
+      if (maxSelections && selected.length >= maxSelections) {
+        return
+      }
       onChange([...selected, item])
     }
   }
@@ -78,10 +85,12 @@ export function MultiSelect({
             !selected.length && 'text-muted-foreground',
             className
           )}
-          disabled={disabled}
+          disabled={disabled || loading}
         >
           <div className="mr-2 flex flex-1 flex-wrap gap-1">
-            {selected.length > 0 ? (
+            {loading ? (
+              'Loading options...'
+            ) : selected.length > 0 ? (
               selectedOptions.length <= 2 ? (
                 selectedOptions.map((option) => (
                   <Badge
@@ -117,7 +126,7 @@ export function MultiSelect({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="max-h-80 w-56"
+        className="max-h-80 w-[var(--radix-dropdown-menu-trigger-width)]"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="border-b p-2" onClick={(e) => e.stopPropagation()}>
@@ -133,25 +142,52 @@ export function MultiSelect({
               onKeyDown={(e) => e.stopPropagation()}
             />
           </div>
+          {maxSelections && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              Selected: {selected.length} / {maxSelections}
+            </div>
+          )}
         </div>
         <div className="max-h-48 overflow-auto">
-          {filteredOptions.length > 0 ? (
-            filteredOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onSelect={(e) => {
-                  e.preventDefault()
-                  handleSelect(option.value)
-                }}
-                className="flex items-center space-x-2"
-              >
-                <Checkbox
-                  checked={selected.includes(option.value)}
-                  onChange={() => handleSelect(option.value)}
-                />
-                <span>{option.label}</span>
-              </DropdownMenuItem>
-            ))
+          {loading ? (
+            <div className="p-2 text-center text-sm text-muted-foreground">
+              Loading options...
+            </div>
+          ) : filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => {
+              const isSelected = selected.includes(option.value)
+              const isDisabled =
+                !isSelected &&
+                Boolean(maxSelections && selected.length >= maxSelections)
+
+              return (
+                <DropdownMenuItem
+                  key={option.value}
+                  onSelect={(e) => {
+                    e.preventDefault()
+                    if (!isDisabled) {
+                      handleSelect(option.value)
+                    }
+                  }}
+                  className={cn(
+                    'flex items-center space-x-2',
+                    isDisabled && 'cursor-not-allowed opacity-50'
+                  )}
+                  disabled={isDisabled}
+                >
+                  <Checkbox
+                    checked={isSelected}
+                    onChange={() => {
+                      if (!isDisabled) {
+                        handleSelect(option.value)
+                      }
+                    }}
+                    disabled={isDisabled}
+                  />
+                  <span>{option.label}</span>
+                </DropdownMenuItem>
+              )
+            })
           ) : (
             <div className="p-2 text-center text-sm text-muted-foreground">
               No options found

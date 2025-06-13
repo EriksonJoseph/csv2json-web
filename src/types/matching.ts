@@ -35,11 +35,19 @@ export interface SearchResponse {
   search_id: string
 }
 
+export interface AsyncSearchResponse {
+  search_id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  message?: string
+  error_message?: string
+}
+
 export interface BulkSearchRequest {
   task_id: string
   columns: string[]
   list: string[]
   threshold: number
+  watchlist_id?: string | null
 }
 
 export interface BulkSearchResult {
@@ -57,18 +65,33 @@ export interface BulkSearchResponse {
   search_id: string
 }
 
+export interface AsyncBulkSearchResponse {
+  search_id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  message?: string
+  error_message?: string
+}
+
 export interface SearchHistoryItem {
   _id: string
-  search_id: string
+  best_match_score: 0
+  total_above_threshold: 0
+  total_rows: 9998
+  watchlist_id: string
+  watchlist_title: string
   columns_used: string[]
   created_at: string
   created_by: string
-  query_names: string
+  query_names: []
+  query_name_length: number
   results_found: number
-  search_type: string
+  search_type: 'single' | 'bulk'
   task_id: string
   threshold_used: number
   total_searched: number
+  status?: 'pending' | 'processing' | 'completed' | 'failed'
+  progress?: number
+  execution_time_ms?: number
 }
 
 export interface SearchHistoryResponse {
@@ -86,9 +109,17 @@ export interface FullRecordResponse {
   task_id: string
 }
 
+export interface MatchedRecord {
+  confidence: number
+  matched_column: string
+  matched_value: string
+  query_name: string
+}
+
 export interface MatchedResultResponse {
   query_name: string
   matched_record_number: number
+  matched_records: MatchedRecord[]
 }
 
 export interface MatchingResultResponse {
@@ -103,4 +134,7 @@ export interface MatchingResultResponse {
   execution_time_ms: number
   total_rows: number
   matched_result: MatchedResultResponse[]
+  status?: 'pending' | 'processing' | 'completed' | 'failed'
+  progress?: number
+  error_message?: string
 }

@@ -158,3 +158,7 @@ export function getPagiantionRowNumber({
 }): number {
   return (page - 1) * limit + index + 1
 }
+
+export function onlyUnique(value: unknown, index: number, array: unknown[]) {
+  return array.indexOf(value) === index
+}

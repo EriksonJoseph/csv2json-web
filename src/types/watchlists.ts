@@ -11,6 +11,7 @@ export interface Watchlist {
   _id: string
   title: string
   list: string[]
+  total_names: number
   created_at: string
   updated_at: string
 }

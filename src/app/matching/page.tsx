@@ -1,20 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { matchingApi } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
-import { Eye, Plus, Search, Trash } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import {
+  Eye,
+  Plus,
+  Search,
+  Trash,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import { Badge } from '@/components/ui/badge'
 import { Pagination } from '@/components/ui/pagination'
 import { getPagiantionRowNumber } from '@/lib/utils'
+import { toast } from 'react-hot-toast'
 
 export default function MatchingPage() {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
+  const searchParams = useSearchParams()
+  const [searchQuery] = useState('')
 
   // #region pagination
   const [page, setPage] = useState(1)
@@ -27,6 +38,7 @@ export default function MatchingPage() {
     queryFn: () => {
       return matchingApi.getHistory({ page, limit }).then((res) => res.data)
     },
+    refetchInterval: 2000,
   })
   // #endregion
 
@@ -44,6 +56,53 @@ export default function MatchingPage() {
           Bluk
         </Badge>
       )
+    }
+  }
+
+  const getStatusBadge = (status: string | undefined) => {
+    switch (status) {
+      case 'pending':
+        return (
+          <Badge
+            variant="outline"
+            className="border-yellow-200 bg-yellow-50 text-yellow-700"
+          >
+            <Clock className="mr-1 h-3 w-3" />
+            Pending
+          </Badge>
+        )
+      case 'processing':
+        return (
+          <Badge
+            variant="outline"
+            className="border-blue-200 bg-blue-50 text-blue-700"
+          >
+            <AlertCircle className="mr-1 h-3 w-3 animate-spin" />
+            Processing
+          </Badge>
+        )
+      case 'completed':
+        return (
+          <Badge
+            variant="outline"
+            className="border-green-200 bg-green-50 text-green-700"
+          >
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Completed
+          </Badge>
+        )
+      case 'failed':
+        return (
+          <Badge
+            variant="outline"
+            className="border-red-200 bg-red-50 text-red-700"
+          >
+            <XCircle className="mr-1 h-3 w-3" />
+            Failed
+          </Badge>
+        )
+      default:
+        return null
     }
   }
 
@@ -105,26 +164,41 @@ export default function MatchingPage() {
                             ? dayjs(history.created_at).format('YY/MM/DD HH:mm')
                             : '-'}
                         </h3>
-                        {getSearchTypeBadge(history.search_type)}
+                        <div className="flex items-center space-x-2">
+                          {getSearchTypeBadge(history.search_type)}
+                          {getStatusBadge(history.status)}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
+                        {history.watchlist_title && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Watchlist:
+                            </span>
+                            <span className="font-medium">
+                              {history.watchlist_title || '-'}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
                             Query Names:
                           </span>
-                          <span className="font-medium">
-                            {history.query_names || '-'}
-                          </span>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <span className="font-medium">
+                              {history.query_name_length || '-'}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
                             Results Found:
                           </span>
-                          <Badge variant="outline" className="font-medium">
+                          <span className="font-medium">
                             {history.results_found || 0}
-                          </Badge>
+                          </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
@@ -137,26 +211,32 @@ export default function MatchingPage() {
                       </div>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() =>
-                          router.push(`/matching/result/${history._id}`)
-                        }
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-red-500"
-                        onClick={() => alert('todo delete')}
-                      >
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete
-                      </Button>
+                      {['failed', 'completed'].includes(
+                        history.status || ''
+                      ) && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() =>
+                              router.push(`/matching/result/${history._id}`)
+                            }
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Results
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-red-500"
+                            onClick={() => alert('todo delete')}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            Delete
+                          </Button>
+                        </>
+                      )}
                     </CardFooter>
                   </Card>
                 ))}

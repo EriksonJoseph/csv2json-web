@@ -12,6 +12,8 @@ export interface Task {
   error_message?: string
   created_at: string
   updated_at: string
+  total_rows?: number
+  total_columns?: number
 }
 
 export interface TaskCreateRequest {

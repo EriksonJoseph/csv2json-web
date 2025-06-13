@@ -38,12 +38,11 @@ export default function WatchlistEditFormPage() {
   const watchlistId = params.id as string
   const mode = searchParams.get('mode') || 'edit'
 
-  console.log(`🚀🙈 TORPONG [page.tsx] params`, params)
-  console.log(`🚀🙈 TORPONG [page.tsx] mode`, mode)
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<WatchlistForm>({
     resolver: zodResolver(watchlistSchema),
@@ -59,6 +58,11 @@ export default function WatchlistEditFormPage() {
     queryFn: () => watchlistsApi.get(watchlistId),
     enabled: !!watchlistId,
   })
+
+  // auto text area heigh
+  const list = watch('list')
+  console.log(`🚀🙈 TORPONG [page.tsx] list`, list)
+  const listNumber = list?.split('\n')?.length || 0
 
   // Set form values when data is loaded
   useEffect(() => {
@@ -171,7 +175,7 @@ export default function WatchlistEditFormPage() {
               <Textarea
                 id="list"
                 placeholder="Enter names, one per line&#10;John Doe&#10;Jane Smith&#10;Bob Johnson"
-                rows={10}
+                rows={Math.max(6, Math.min(20, listNumber))}
                 {...register('list')}
                 className={errors.list ? 'border-red-500' : ''}
                 disabled={mode === 'view'}

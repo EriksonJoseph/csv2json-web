@@ -77,7 +77,7 @@ export function SearchableSelect({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="max-h-80 w-56"
+        className="max-h-80 w-[var(--radix-dropdown-menu-trigger-width)]"
         onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="border-b p-2" onClick={(e) => e.stopPropagation()}>

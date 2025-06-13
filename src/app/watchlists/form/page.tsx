@@ -30,6 +30,7 @@ export default function WatchListFormPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<WatchlistForm>({
     resolver: zodResolver(watchlistSchema),
@@ -38,6 +39,11 @@ export default function WatchListFormPage() {
       list: '',
     },
   })
+
+  // #region auto height
+  const list = watch('list')
+  const listNumber = list?.split('\n')?.length || 0
+  // #endregion
 
   const createMutation = useMutation({
     mutationFn: (data: WatchlistCreateRequest) => {
@@ -99,7 +105,7 @@ export default function WatchListFormPage() {
               <Textarea
                 id="list"
                 placeholder="Enter names, one per line&#10;John Doe&#10;Jane Smith&#10;Bob Johnson"
-                rows={10}
+                rows={Math.max(6, Math.min(20, listNumber))}
                 {...register('list')}
                 className={errors.list ? 'border-red-500' : ''}
               />
