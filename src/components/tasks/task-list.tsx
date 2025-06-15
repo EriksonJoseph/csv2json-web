@@ -64,10 +64,6 @@ export function TaskList() {
     // refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
   })
 
-  useEffect(() => {
-    console.log(`🚀🙈 TORPONG [task-list.tsx] tasksData`, tasksData)
-  }, [tasksData])
-
   const deleteMutation = useMutation({
     mutationFn: (taskId: string) => tasksApi.delete(taskId),
     onSuccess: () => {

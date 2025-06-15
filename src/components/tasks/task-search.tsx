@@ -49,7 +49,7 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
         if (!newOptions[col]) {
           newOptions[col] = {
             whole_word: true,
-            match_case: true,
+            match_case: false,
             match_length: true,
           }
         }
@@ -233,7 +233,7 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`${column}-whole-word`}
-                          checked={columnOptions[column]?.whole_word || true}
+                          checked={columnOptions[column]?.whole_word ?? true}
                           onCheckedChange={(checked) =>
                             updateColumnOption(
                               column,
@@ -253,7 +253,7 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`${column}-match-case`}
-                          checked={columnOptions[column]?.match_case || true}
+                          checked={columnOptions[column]?.match_case ?? false}
                           onCheckedChange={(checked) =>
                             updateColumnOption(
                               column,
@@ -273,7 +273,7 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id={`${column}-match-length`}
-                          checked={columnOptions[column]?.match_length || true}
+                          checked={columnOptions[column]?.match_length ?? true}
                           onCheckedChange={(checked) =>
                             updateColumnOption(
                               column,

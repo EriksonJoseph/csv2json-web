@@ -28,8 +28,6 @@ export default function MatchingResultPage() {
 
   const taskData = result?.task_detail
 
-  console.log(`🚀🙈 TORPONG [page.tsx] result`, result)
-
   // #region Handle error
   if (error || !result || result.status === 'failed') {
     const errorMessage =
@@ -98,12 +96,6 @@ export default function MatchingResultPage() {
               <p className="text-muted-foreground">Search ID: {result._id}</p>
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
         </div>
       </div>
       {/* Task Information Section */}

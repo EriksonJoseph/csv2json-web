@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/store'
-import { Home, ListTodo, Search, Bookmark, Menu, X } from 'lucide-react'
+import { Home, ListTodo, Search, Menu, X } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -28,19 +28,16 @@ export function Sidebar() {
         )}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between border-b border-gray-200 p-2 dark:border-gray-700">
+          <div
+            className={`flex h-12 items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} border-b border-gray-200 p-2 dark:border-gray-700`}
+          >
             {!sidebarCollapsed && (
               <h1 className="pb-1 text-xl font-bold text-gray-900 dark:text-white">
                 CSV2JSON
               </h1>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="lg:hidden"
-            >
-              <X className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+              <Menu className="h-5 w-5" />
             </Button>
           </div>
 

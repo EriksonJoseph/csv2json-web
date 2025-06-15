@@ -166,3 +166,5 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Import Organization**: Absolute imports with path mapping
 - **Component Testing**: Structured for easy testing setup
 - **Hot Reloading**: Fast development with Next.js dev server
+
+- `to memorize`

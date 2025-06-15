@@ -193,17 +193,6 @@ export default function TasksPage() {
                       </div>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between space-x-2 p-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hidden flex-1 xl:flex"
-                        onClick={() =>
-                          router.push(`/tasks/form/${task._id}?mode=view`)
-                        }
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
                       {task.is_done_created_doc && !task.error_message && (
                         <>
                           <Button

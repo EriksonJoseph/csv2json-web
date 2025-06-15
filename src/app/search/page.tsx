@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Eye,
   Plus,
@@ -20,10 +20,12 @@ import { Badge } from '@/components/ui/badge'
 import { Pagination } from '@/components/ui/pagination'
 import { getPagiantionRowNumber } from '@/lib/utils'
 import { searchApi } from '@/lib/api'
+import toast from 'react-hot-toast'
 
 export default function MatchingPage() {
   const router = useRouter()
   const [searchQuery] = useState('')
+  const queryClient = useQueryClient()
 
   // #region pagination
   const [page, setPage] = useState(1)
@@ -32,19 +34,24 @@ export default function MatchingPage() {
 
   // #region API
   const { data: histories, isLoading } = useQuery({
-    queryKey: ['matching_list', page, limit],
+    queryKey: ['search_history', page, limit],
     queryFn: () => {
       return searchApi.list({ page, limit }).then((res) => res.data)
     },
-    // refetchInterval: 2000,
+    refetchInterval: 5000,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (searchId: string) => searchApi.delete(searchId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['search_history'] })
+      toast.success('Search deleted successfully')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete search')
+    },
   })
   // #endregion
-
-  useEffect(() => {
-    if (histories) {
-      console.log(`🚀🙈 TORPONG [page.tsx] histories`, histories)
-    }
-  }, [histories])
 
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
@@ -115,16 +122,9 @@ export default function MatchingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Fuzzy Matching</h1>
-          <p className="text-muted-foreground">
-            Search for similar values in your processed data
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => router.push('/matching/form')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Matching
-          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Searching Result
+          </h1>
         </div>
       </div>
 
@@ -197,7 +197,7 @@ export default function MatchingPage() {
                             Process Time:
                           </span>
                           <span className="font-medium">
-                            {history.processing_time.toFixed(2) || 0} s
+                            {history?.processing_time?.toFixed(2) || 0} s
                           </span>
                         </div>
                       </div>
@@ -222,7 +222,7 @@ export default function MatchingPage() {
                             variant="outline"
                             size="sm"
                             className="w-full text-red-500"
-                            onClick={() => alert('todo delete')}
+                            onClick={() => deleteMutation.mutate(history._id)}
                           >
                             <Trash className="mr-2 h-4 w-4" />
                             Delete

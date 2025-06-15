@@ -85,6 +85,8 @@ export const searchApi = {
 
   getResult: (id: string) =>
     api.get<SearchHistoryResponse>(`/search/result/${id}`),
+
+  delete: (search_id: string) => api.delete<string>(`search/${search_id}`),
 }
 
 export const usersApi = {
