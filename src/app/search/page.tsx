@@ -22,7 +22,7 @@ import { getPagiantionRowNumber } from '@/lib/utils'
 import { searchApi } from '@/lib/api'
 import toast from 'react-hot-toast'
 
-export default function MatchingPage() {
+export default function SearchPage() {
   const router = useRouter()
   const [searchQuery] = useState('')
   const queryClient = useQueryClient()

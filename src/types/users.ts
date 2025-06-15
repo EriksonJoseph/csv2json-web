@@ -15,13 +15,10 @@ export interface UserProfile {
 }
 
 export interface UserUpdateRequest {
-  first_name?: string
-  last_name?: string
-  email?: string
-  bio?: string
-  phone?: string
-  timezone?: string
-  language?: string
+  first_name: string
+  middle_name?: string
+  last_name: string
+  email: string
 }
 
 export interface ChangePasswordRequest {

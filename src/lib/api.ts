@@ -90,10 +90,12 @@ export const searchApi = {
 }
 
 export const usersApi = {
+  getMe: () => api.get('/user/me'),
+
   getProfile: () => api.get<UserProfile>('/user/profile'),
 
-  updateProfile: (data: UserUpdateRequest) =>
-    api.put<UserProfile>('/user/profile', data),
+  updateProfile: (userId: string, data: UserUpdateRequest) =>
+    api.patch<UserProfile>(`/user/${userId}`, data),
 
   changePassword: (data: ChangePasswordRequest) =>
     api.post('/user/change-password', data),
