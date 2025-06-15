@@ -13,13 +13,11 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResponse<T> {
-  items: T[]
+  list: T[]
   total: number
   page: number
   per_page: number
   total_pages: number
-  has_next: boolean
-  has_prev: boolean
 }
 
 export interface PaginationConfig {
@@ -44,6 +42,12 @@ export interface LoadingState {
   isLoading: boolean
   error?: string
 }
+
+export type BackgroundProcessStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
 
 export type Theme = 'light' | 'dark' | 'system'
 

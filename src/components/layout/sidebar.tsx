@@ -5,23 +5,12 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/store'
-import {
-  Home,
-  FileText,
-  ListTodo,
-  Search,
-  Bookmark,
-  User,
-  Settings,
-  Menu,
-  X,
-} from 'lucide-react'
+import { Home, ListTodo, Search, Bookmark, Menu, X } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Watchlists', href: '/watchlists', icon: Bookmark },
   { name: 'Tasks', href: '/tasks', icon: ListTodo },
-  { name: 'Matching', href: '/matching', icon: Search },
+  { name: 'Matching', href: '/search', icon: Search },
 ]
 
 export function Sidebar() {

@@ -1,3 +1,8 @@
+import {
+  CreateSearchRequest,
+  SearchHistoryResponse,
+  SearchListResponse,
+} from '@/types/search'
 import api from './axios'
 import {
   AuthResponse,
@@ -11,28 +16,12 @@ import {
   TaskCreateRequest,
   TaskListResponse,
   CurrentProcessingTask,
-  TaskColumnsResponse,
-  SingleSearchRequest,
-  SearchResponse,
-  AsyncSearchResponse,
-  BulkSearchRequest,
-  BulkSearchResponse,
-  AsyncBulkSearchResponse,
-  SearchHistoryResponse,
-  Watchlist,
-  WatchlistCreateRequest,
-  WatchlistResponse,
-  WatchlistItemCreateRequest,
-  WatchlistMatchRequest,
-  WatchlistMatchResponse,
   UserProfile,
   UserUpdateRequest,
   ChangePasswordRequest,
   UserActivityResponse,
   UserStats,
   PaginationParams,
-  WatchlistUpdateRequest,
-  MatchingResultResponse,
 } from '@/types'
 
 export const authApi = {
@@ -88,58 +77,14 @@ export const tasksApi = {
     api.get<CurrentProcessingTask>('/task/current-processing'),
 }
 
-export const matchingApi = {
-  getColumns: (taskId: string) =>
-    api.get<TaskColumnsResponse>(`/matching/columns/${taskId}`),
+export const searchApi = {
+  create: (data: CreateSearchRequest) => api.post<string>('/search', data),
 
-  search: (data: SingleSearchRequest) =>
-    api.post<AsyncSearchResponse>('/matching/search', data, {
-      timeout: 30000, // 30 seconds for async submission
-    }),
+  list: (params: PaginationParams) =>
+    api.get<SearchListResponse>('/search/history', { params }),
 
-  bulkSearch: (data: BulkSearchRequest) =>
-    api.post<AsyncBulkSearchResponse>('/matching/bulk-search', data, {
-      timeout: 30000, // 30 seconds for async submission
-    }),
-
-  getSearchStatus: (search_id: string) =>
-    api.get<MatchingResultResponse>(`/matching/search-result/${search_id}`),
-
-  getHistory: (params?: PaginationParams) =>
-    api.get<SearchHistoryResponse>('/matching/history', { params }),
-
-  getResult: (search_id: string) =>
-    api.get<MatchingResultResponse>(`matching/result/${search_id}`),
-}
-
-export const watchlistsApi = {
-  list: (params?: PaginationParams) =>
-    api.get<WatchlistResponse>('/watchlist', { params }),
-
-  create: (data: WatchlistCreateRequest) =>
-    api.post<Watchlist>('/watchlist', data),
-
-  get: (id: string) => api.get<Watchlist>(`/watchlist/${id}`),
-
-  update: (id: string, data: WatchlistUpdateRequest) =>
-    api.put<Watchlist>(`/watchlist/${id}`, data),
-
-  delete: (id: string) => api.delete(`/watchlist/${id}`),
-
-  addItem: (watchlistId: string, data: WatchlistItemCreateRequest) =>
-    api.post(`/watchlist/${watchlistId}/items`, data),
-
-  updateItem: (
-    watchlistId: string,
-    itemId: string,
-    data: Partial<WatchlistItemCreateRequest>
-  ) => api.put(`/watchlist/${watchlistId}/items/${itemId}`, data),
-
-  deleteItem: (watchlistId: string, itemId: string) =>
-    api.delete(`/watchlist/${watchlistId}/items/${itemId}`),
-
-  match: (data: WatchlistMatchRequest) =>
-    api.post<WatchlistMatchResponse>('/watchlist/match', data),
+  getResult: (id: string) =>
+    api.get<SearchHistoryResponse>(`/search/result/${id}`),
 }
 
 export const usersApi = {

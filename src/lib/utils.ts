@@ -162,3 +162,8 @@ export function getPagiantionRowNumber({
 export function onlyUnique(value: unknown, index: number, array: unknown[]) {
   return array.indexOf(value) === index
 }
+
+export function isValidObjectId(str: string): boolean {
+  const objectIdRegex = /^[0-9a-f]{24}$/i
+  return objectIdRegex.test(str)
+}

@@ -15,8 +15,6 @@ import {
   XCircle,
   MoreHorizontal,
   Trash2,
-  Users,
-  User,
 } from 'lucide-react'
 import { Pagination } from '@/components/ui/pagination'
 import {
@@ -213,26 +211,11 @@ export default function TasksPage() {
                             size="icon"
                             className="flex-1"
                             onClick={() =>
-                              router.push(
-                                `/matching/form?task_id=${task._id}&type=single`
-                              )
+                              router.push(`/tasks/search/${task._id}`)
                             }
                           >
-                            <User className="mr-2 h-4 w-4" />
-                            Single
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() =>
-                              router.push(
-                                `/matching/form?task_id=${task._id}&type=bulk`
-                              )
-                            }
-                          >
-                            <Users className="mr-2 h-4 w-4" />
-                            Bluk
+                            <Search className="mr-2 h-4 w-4" />
+                            Search
                           </Button>
                         </>
                       )}

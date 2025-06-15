@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { matchingApi } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import {
   Eye,
@@ -15,16 +14,15 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
 import { Badge } from '@/components/ui/badge'
 import { Pagination } from '@/components/ui/pagination'
 import { getPagiantionRowNumber } from '@/lib/utils'
-import { toast } from 'react-hot-toast'
+import { searchApi } from '@/lib/api'
 
 export default function MatchingPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [searchQuery] = useState('')
 
   // #region pagination
@@ -36,28 +34,17 @@ export default function MatchingPage() {
   const { data: histories, isLoading } = useQuery({
     queryKey: ['matching_list', page, limit],
     queryFn: () => {
-      return matchingApi.getHistory({ page, limit }).then((res) => res.data)
+      return searchApi.list({ page, limit }).then((res) => res.data)
     },
-    refetchInterval: 2000,
+    // refetchInterval: 2000,
   })
   // #endregion
 
-  const getSearchTypeBadge = (type: string | undefined) => {
-    if (type === 'single') {
-      return (
-        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-          Single
-        </Badge>
-      )
+  useEffect(() => {
+    if (histories) {
+      console.log(`🚀🙈 TORPONG [page.tsx] histories`, histories)
     }
-    if (type === 'bulk') {
-      return (
-        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-          Bluk
-        </Badge>
-      )
-    }
-  }
+  }, [histories])
 
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
@@ -165,47 +152,52 @@ export default function MatchingPage() {
                             : '-'}
                         </h3>
                         <div className="flex items-center space-x-2">
-                          {getSearchTypeBadge(history.search_type)}
                           {getStatusBadge(history.status)}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {history.watchlist_title && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Watchlist:
-                            </span>
-                            <span className="font-medium">
-                              {history.watchlist_title || '-'}
-                            </span>
-                          </div>
-                        )}
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
-                            Query Names:
+                            Task Topic:
                           </span>
                           <div className="mt-1 flex flex-wrap gap-1">
                             <span className="font-medium">
-                              {history.query_name_length || '-'}
+                              {history.task_topic || '-'}
                             </span>
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
-                            Results Found:
+                            File Name:
                           </span>
                           <span className="font-medium">
-                            {history.results_found || 0}
+                            {history.original_filename || '-'}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">
-                            Threshold:
+                            Total Query:
                           </span>
                           <span className="font-medium">
-                            {history.threshold_used || '-'}
+                            {history.total_queries || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Total Rows:
+                          </span>
+                          <span className="font-medium">
+                            {history.total_rows.toLocaleString() || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Process Time:
+                          </span>
+                          <span className="font-medium">
+                            {history.processing_time.toFixed(2) || 0} s
                           </span>
                         </div>
                       </div>
@@ -220,7 +212,7 @@ export default function MatchingPage() {
                             size="sm"
                             className="w-full"
                             onClick={() =>
-                              router.push(`/matching/result/${history._id}`)
+                              router.push(`/search/result/${history._id}`)
                             }
                           >
                             <Eye className="mr-2 h-4 w-4" />
