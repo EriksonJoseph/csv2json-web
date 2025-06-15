@@ -44,6 +44,12 @@ export interface TokenRefreshRequest {
   refresh_token: string
 }
 
+export interface ChangePasswordRequest {
+  old_password: string
+  new_password: string
+  confirm_password: string
+}
+
 export interface TokenRefreshResponse {
   access_token: string
   token_type: string

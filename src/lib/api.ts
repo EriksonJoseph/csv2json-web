@@ -33,6 +33,9 @@ export const authApi = {
   refresh: (data: TokenRefreshRequest) =>
     api.post<AuthResponse>('/auth/refresh', data),
 
+  changePassword: (userId: string, data: ChangePasswordRequest) =>
+    api.patch<string>(`/auth/change-password/${userId}`, data),
+
   logout: (data: TokenRefreshRequest) => api.post('/auth/logout', data),
 
   me: () => api.get<User>('/auth/me'),
