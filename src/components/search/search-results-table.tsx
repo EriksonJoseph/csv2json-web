@@ -47,13 +47,13 @@ export default function SearchResultsTable({
     return results.filter((result) => {
       if (activeFilter === 'no-matches') {
         // Show only queries with no matches in any column
-        return !columnNames.some(columnName => 
-          result.column_results[columnName]?.found
+        return !columnNames.some(
+          (columnName) => result.column_results[columnName]?.found
         )
       } else if (activeFilter === 'all-matches') {
         // Show only queries that match in every column
-        return columnNames.every(columnName => 
-          result.column_results[columnName]?.found
+        return columnNames.every(
+          (columnName) => result.column_results[columnName]?.found
         )
       } else {
         // Show only queries that have matches in the specific column
@@ -71,26 +71,28 @@ export default function SearchResultsTable({
         <CardTitle className="flex items-center justify-between">
           <span>Search Results</span>
           <span className="text-sm font-normal text-muted-foreground">
-            {activeFilter ? `${filteredResults.length} of ${results.length} queries` : `${resultsFound} of ${totalSearched} queries found matches`}
+            {activeFilter
+              ? `${filteredResults.length} of ${results.length} queries`
+              : `${resultsFound} of ${totalSearched} queries found matches`}
           </span>
         </CardTitle>
-        
+
         {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          <div className="flex items-center gap-2 mr-4">
-            <Filter className="w-4 h-4 text-muted-foreground" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mr-4 flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filter by:</span>
           </div>
-          
+
           <Button
             variant={activeFilter === 'no-matches' ? 'default' : 'outline'}
             size="sm"
             onClick={() => handleFilterClick('no-matches')}
             className="h-7"
           >
-            <XCircle className="w-3 h-3 mr-1" />
+            <XCircle className="mr-1 h-3 w-3" />
             No Matches
-            {activeFilter === 'no-matches' && <X className="w-3 h-3 ml-1" />}
+            {activeFilter === 'no-matches' && <X className="ml-1 h-3 w-3" />}
           </Button>
 
           <Button
@@ -99,9 +101,9 @@ export default function SearchResultsTable({
             onClick={() => handleFilterClick('all-matches')}
             className="h-7"
           >
-            <CheckCircle2 className="w-3 h-3 mr-1" />
+            <CheckCircle2 className="mr-1 h-3 w-3" />
             All Matches
-            {activeFilter === 'all-matches' && <X className="w-3 h-3 ml-1" />}
+            {activeFilter === 'all-matches' && <X className="ml-1 h-3 w-3" />}
           </Button>
 
           {columnNames.map((columnName) => (
@@ -112,12 +114,12 @@ export default function SearchResultsTable({
               onClick={() => handleFilterClick(columnName)}
               className="h-7"
             >
-              <CheckCircle className="w-3 h-3 mr-1" />
+              <CheckCircle className="mr-1 h-3 w-3" />
               {columnName}
-              {activeFilter === columnName && <X className="w-3 h-3 ml-1" />}
+              {activeFilter === columnName && <X className="ml-1 h-3 w-3" />}
             </Button>
           ))}
-          
+
           {activeFilter && (
             <Button
               variant="ghost"
@@ -147,19 +149,30 @@ export default function SearchResultsTable({
             <TableBody>
               {filteredResults.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columnNames.length + 2} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={columnNames.length + 2}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     No results match the current filter
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredResults.map((result) => (
                   <TableRow key={result.query_no}>
-                    <TableCell className="font-medium">{result.query_no}</TableCell>
-                    <TableCell className="font-medium">{result.query_name}</TableCell>
+                    <TableCell className="font-medium">
+                      {result.query_no}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {result.query_name}
+                    </TableCell>
                     {columnNames.map((columnName) => {
                       const columnResult = result.column_results[columnName]
                       if (!columnResult) {
-                        return <TableCell key={columnName} className="text-center">-</TableCell>
+                        return (
+                          <TableCell key={columnName} className="text-center">
+                            -
+                          </TableCell>
+                        )
                       }
 
                       return (
@@ -167,12 +180,14 @@ export default function SearchResultsTable({
                           <div className="flex items-center justify-center">
                             {columnResult.found ? (
                               <div className="flex items-center text-green-600">
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                <span className="font-medium">({columnResult.count})</span>
+                                <CheckCircle className="mr-1 h-4 w-4" />
+                                <span className="font-medium">
+                                  ({columnResult.count})
+                                </span>
                               </div>
                             ) : (
                               <div className="flex items-center text-red-500">
-                                <XCircle className="w-4 h-4" />
+                                <XCircle className="h-4 w-4" />
                               </div>
                             )}
                           </div>

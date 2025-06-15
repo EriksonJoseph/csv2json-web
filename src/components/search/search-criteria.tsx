@@ -26,18 +26,18 @@ export default function SearchCriteria({
         <CardTitle>Search Options for Each Column</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
           {columnNames.map((columnName) => {
             const options = columnOptions[columnName]
             if (!options) return null
 
             return (
-              <div key={columnName} className="rounded-lg border p-4">
+              <div key={columnName} className="h-25 rounded-lg border p-4">
                 <h4 className="mb-3 text-sm font-medium">{columnName}</h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2">
                   <Badge
                     variant={options.whole_word ? 'default' : 'secondary'}
-                    className="text-xs"
+                    className="justify-start text-xs"
                   >
                     {options.whole_word ? (
                       <CheckCircle className="mr-1 h-3 w-3" />
@@ -48,7 +48,7 @@ export default function SearchCriteria({
                   </Badge>
                   <Badge
                     variant={options.match_case ? 'default' : 'secondary'}
-                    className="text-xs"
+                    className="justify-start text-xs"
                   >
                     {options.match_case ? (
                       <CheckCircle className="mr-1 h-3 w-3" />
@@ -59,7 +59,7 @@ export default function SearchCriteria({
                   </Badge>
                   <Badge
                     variant={options.match_length ? 'default' : 'secondary'}
-                    className="text-xs"
+                    className="justify-start text-xs"
                   >
                     {options.match_length ? (
                       <CheckCircle className="mr-1 h-3 w-3" />

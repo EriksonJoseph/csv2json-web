@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Download, XCircle } from 'lucide-react'
-import { useState } from 'react'
-import { onlyUnique } from '@/lib/utils'
 import TaskInfo from '@/components/tasks/task-info'
 import SearchCriteria from '@/components/search/search-criteria'
 import SearchResultsTable from '@/components/search/search-results-table'
@@ -18,15 +16,9 @@ export default function MatchingResultPage() {
   const params = useParams()
   const router = useRouter()
   const searchId = params.id as string
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
-  const [activeTab, setActiveTab] = useState('with-matches')
 
   // Fetch matching result with polling for async searches
-  const {
-    data: result,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: result, error } = useQuery({
     queryKey: ['matching-result', searchId],
     queryFn: () => searchApi.getResult(searchId).then((res) => res.data),
     enabled: !!searchId,
