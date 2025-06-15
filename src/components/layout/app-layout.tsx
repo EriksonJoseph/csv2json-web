@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { useAuthStore, useUIStore } from '@/store'
 import { cn } from '@/lib/utils'
 import { LoadingOverlay } from '@/components/ui/loading'
+import { Analytics } from '@vercel/analytics/next'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -38,6 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Header />
         <main className="p-6">{children}</main>
       </div>
+      <Analytics />
     </div>
   )
 }
