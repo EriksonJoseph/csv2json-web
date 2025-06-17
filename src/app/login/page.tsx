@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -54,10 +53,11 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data)
-      // Force hard redirect to ensure state is properly loaded
-      window.location.href = '/dashboard'
+      // Only redirect on successful login
+      router.push('/dashboard')
     } catch (error) {
       console.error('Login error:', error)
+      // Don't redirect on error - let user see the error message and keep form data
     }
   }
 

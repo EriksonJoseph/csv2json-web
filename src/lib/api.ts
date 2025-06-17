@@ -19,8 +19,6 @@ import {
   UserProfile,
   UserUpdateRequest,
   ChangePasswordRequest,
-  UserActivityResponse,
-  UserStats,
   PaginationParams,
 } from '@/types'
 
@@ -103,8 +101,5 @@ export const usersApi = {
   changePassword: (data: ChangePasswordRequest) =>
     api.post('/user/change-password', data),
 
-  getActivity: (params?: PaginationParams) =>
-    api.get<UserActivityResponse>('/user/activity', { params }),
-
-  getStats: () => api.get<UserStats>('/user/stats'),
+  list: (params?: PaginationParams) => api.get('user', { params }),
 }

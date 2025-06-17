@@ -47,9 +47,10 @@ export const useAuthStore = create<AuthState>()(
 
           toast.success('Successfully logged in!')
         } catch (error: any) {
-          set({ isLoading: false })
+          console.log(`🚀🙈 TORPONG [auth.ts] error`, error)
           const message = error.response?.data?.message || 'Login failed'
-          toast.error(message)
+          toast.error(message, { duration: 5000 })
+          set({ isLoading: false })
           throw error
         }
       },
@@ -76,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           set({ isLoading: false })
           const message = error.response?.data?.message || 'Registration failed'
-          toast.error(message)
+          toast.error(message, { duration: 5000 })
           throw error
         }
       },
