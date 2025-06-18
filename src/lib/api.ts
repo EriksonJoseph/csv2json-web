@@ -37,6 +37,12 @@ export const authApi = {
   logout: (data: TokenRefreshRequest) => api.post('/auth/logout', data),
 
   me: () => api.get<User>('/auth/me'),
+
+  verifyEmail: (token: string, password: string) =>
+    api.post('/auth/verify-email', { token, password }),
+
+  resetPassword: (token: string, password: string) =>
+    api.post('/auth/reset-password', { token, password }),
 }
 
 export const filesApi = {

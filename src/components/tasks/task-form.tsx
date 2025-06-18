@@ -88,7 +88,7 @@ export function TaskForm({
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       toast.success('Task created successfully!')
       reset()
-      onSuccess?.() || router.push('/tasks')
+      onSuccess?.() || router.push('/auth/tasks')
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create task')
@@ -218,7 +218,7 @@ export function TaskForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/tasks')}
+              onClick={() => router.push('/auth/tasks')}
             >
               Cancel
             </Button>

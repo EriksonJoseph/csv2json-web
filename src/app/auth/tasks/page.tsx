@@ -134,7 +134,7 @@ export default function TasksPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => router.push('/tasks/form')}>
+          <Button onClick={() => router.push('/auth/tasks/form')}>
             <Plus className="mr-2 h-4 w-4" />
             Create Task
           </Button>
@@ -200,7 +200,7 @@ export default function TasksPage() {
                             size="icon"
                             className="flex-1"
                             onClick={() =>
-                              router.push(`/tasks/search/${task._id}`)
+                              router.push(`/auth/tasks/search/${task._id}`)
                             }
                           >
                             <Search className="mr-2 h-4 w-4" />
@@ -218,7 +218,9 @@ export default function TasksPage() {
                           <DropdownMenuItem
                             className="xl:hidden"
                             onClick={() =>
-                              router.push(`/tasks/form/${task._id}?mode=view`)
+                              router.push(
+                                `/auth/tasks/form/${task._id}?mode=view`
+                              )
                             }
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -264,7 +266,7 @@ export default function TasksPage() {
               {!searchQuery && (
                 <Button
                   className="mt-4"
-                  onClick={() => router.push('/tasks/form')}
+                  onClick={() => router.push('/auth/tasks/form')}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Create Task

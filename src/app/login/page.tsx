@@ -54,7 +54,7 @@ export default function LoginPage() {
     try {
       await login(data)
       // Only redirect on successful login
-      router.push('/dashboard')
+      router.push('/auth/dashboard')
     } catch (error) {
       console.error('Login error:', error)
       // Don't redirect on error - let user see the error message and keep form data

@@ -17,7 +17,7 @@ import { ChangePasswordRequest } from '@/types'
 
 const changePasswordSchema = z
   .object({
-    old_password: z.string().min(1, 'Old password is required'),
+    current_password: z.string().min(1, 'Old password is required'),
     new_password: z
       .string()
       .min(8, 'New password must be at least 8 characters')
@@ -64,7 +64,24 @@ export default function ChangePasswordPage() {
       }, 1000)
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to change password')
+      // Don't show toast here since axios interceptor already handles it
+      console.error('Change password error:', error)
+
+      // Handle specific validation errors for 422 status
+      if (error.response?.status === 422) {
+        const errorData = error.response?.data
+        console.error('change password error : ', error)
+        if (errorData?.errors) {
+          // Handle field-specific validation errors
+          Object.values(errorData.errors).forEach((err: any) => {
+            if (Array.isArray(err)) {
+              err.forEach((msg) => console.error('Validation error:', msg))
+            } else {
+              console.error('Validation error:', err)
+            }
+          })
+        }
+      }
     },
   })
 
@@ -75,14 +92,23 @@ export default function ChangePasswordPage() {
   } = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      old_password: '',
+      current_password: '',
       new_password: '',
       confirm_password: '',
     },
   })
 
   const onSubmit = (data: ChangePasswordForm) => {
-    changePasswordMutation.mutate(data)
+    const changePasswordData: ChangePasswordRequest = {
+      current_password: data.current_password,
+      new_password: data.new_password,
+      confirm_password: data.confirm_password,
+    }
+    console.log(
+      `🚀🙈 TORPONG [page.tsx] changePasswordData`,
+      changePasswordData
+    )
+    changePasswordMutation.mutate(changePasswordData)
   }
 
   return (
@@ -100,18 +126,18 @@ export default function ChangePasswordPage() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="old_password">Old Password *</Label>
+              <Label htmlFor="current_password">Old Password *</Label>
               <Input
-                id="old_password"
+                id="current_password"
                 type="password"
                 placeholder="Enter your current password"
                 disabled={changePasswordMutation.isPending}
-                {...register('old_password')}
-                className={errors.old_password ? 'border-red-500' : ''}
+                {...register('current_password')}
+                className={errors.current_password ? 'border-red-500' : ''}
               />
-              {errors.old_password && (
+              {errors.current_password && (
                 <p className="text-sm text-red-500">
-                  {errors.old_password.message}
+                  {errors.current_password.message}
                 </p>
               )}
             </div>

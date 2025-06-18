@@ -8,9 +8,9 @@ import { useUIStore } from '@/store'
 import { Home, ListTodo, Search, Menu, X } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Tasks', href: '/tasks', icon: ListTodo },
-  { name: 'Matching', href: '/search', icon: Search },
+  { name: 'Dashboard', href: '/auth/dashboard', icon: Home },
+  { name: 'Tasks', href: '/auth/tasks', icon: ListTodo },
+  { name: 'Matching', href: '/auth/search', icon: Search },
 ]
 
 export function Sidebar() {

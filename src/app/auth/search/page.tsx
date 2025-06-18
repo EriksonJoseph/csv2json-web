@@ -212,7 +212,7 @@ export default function SearchPage() {
                             size="sm"
                             className="w-full"
                             onClick={() =>
-                              router.push(`/search/result/${history._id}`)
+                              router.push(`/auth/search/result/${history._id}`)
                             }
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -240,16 +240,16 @@ export default function SearchPage() {
               <h3 className="mb-2 text-lg font-medium">No history found</h3>
               <p className="text-muted-foreground">
                 {searchQuery
-                  ? `No history found matching "${searchQuery}"`
-                  : 'Create your first matching to get started'}
+                  ? `No history found seach "${searchQuery}"`
+                  : 'Create your first saeach to get started'}
               </p>
               {!searchQuery && (
                 <Button
                   className="mt-4"
-                  onClick={() => router.push('/matching/form')}
+                  onClick={() => router.push('/auth/tasks')}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Matching
+                  Create Seach
                 </Button>
               )}
             </div>

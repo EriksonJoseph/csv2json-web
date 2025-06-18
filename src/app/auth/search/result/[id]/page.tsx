@@ -37,11 +37,7 @@ export default function MatchingResultPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/search')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.back()}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
@@ -65,7 +61,7 @@ export default function MatchingResultPage() {
             <XCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
             <h3 className="mb-2 text-lg font-medium">Search Failed</h3>
             <p className="text-muted-foreground">{errorMessage}</p>
-            <Button className="mt-4" onClick={() => router.push('/tasks')}>
+            <Button className="mt-4" onClick={() => router.push('/auth/tasks')}>
               Try Again
             </Button>
           </CardContent>
@@ -80,11 +76,7 @@ export default function MatchingResultPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/search')}
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>

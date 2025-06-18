@@ -22,7 +22,7 @@ export default function TaskCreatePage() {
           </p>
         </div>
       </div>
-      <TaskForm mode="create" onSuccess={() => router.push('/tasks')} />
+      <TaskForm mode="create" onSuccess={() => router.push('/auth/tasks')} />
     </div>
   )
 }

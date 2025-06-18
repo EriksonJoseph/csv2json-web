@@ -57,11 +57,11 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/profile')}>
+        <DropdownMenuItem onClick={() => router.push('/auth/profile')}>
           <UserIcon className="mr-2 h-4 w-4" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/change-password')}>
+        <DropdownMenuItem onClick={() => router.push('/auth/change-password')}>
           <Key className="mr-2 h-4 w-4" />
           Change password
         </DropdownMenuItem>

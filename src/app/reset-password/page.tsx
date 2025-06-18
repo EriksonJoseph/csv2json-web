@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
-import { useAuthStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading'
 import { Input } from '@/components/ui/input'
@@ -19,13 +17,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { toast } from 'react-hot-toast'
+import { authApi } from '@/lib/api'
 
-const registerSchema = z
+const resetPasswordSchema = z
   .object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
-    first_name: z.string().optional(),
-    last_name: z.string().optional(),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     password_confirm: z.string(),
   })
@@ -34,37 +30,67 @@ const registerSchema = z
     path: ['password_confirm'],
   })
 
-type RegisterForm = z.infer<typeof registerSchema>
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>
 
-export default function RegisterPage() {
+export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
   const router = useRouter()
-  const { register: registerUser, isLoading } = useAuthStore()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const tokenParam = searchParams.get('token')
+    if (!tokenParam) {
+      toast.error('Invalid reset password link')
+      router.push('/login')
+      return
+    }
+    setToken(tokenParam)
+  }, [searchParams, router])
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      username: '',
-      email: '',
-      first_name: '',
-      last_name: '',
       password: '',
       password_confirm: '',
     },
   })
 
-  const onSubmit = async (data: RegisterForm) => {
-    try {
-      await registerUser(data)
-      router.push('/auth/dashboard')
-    } catch (error) {
-      console.error('Registration error:', error)
+  const onSubmit = async (data: ResetPasswordForm) => {
+    if (!token) {
+      toast.error('Invalid reset token')
+      return
     }
+
+    setIsLoading(true)
+    try {
+      await authApi.resetPassword(token, data.password)
+      toast.success('Password reset successfully!')
+      router.push('/login')
+    } catch (error) {
+      console.error('Reset password error:', error)
+      toast.error('Failed to reset password. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (!token) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <p>Invalid reset password link. Redirecting to login...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -72,71 +98,16 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-center text-2xl font-bold">
-            Create your account
+            Reset Your Password
           </CardTitle>
           <CardDescription className="text-center">
-            Sign up to start using CSV2JSON Web
+            Enter your new password to complete the reset process
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">First Name</Label>
-                <Input
-                  id="first_name"
-                  type="text"
-                  autoComplete="given-name"
-                  disabled={isLoading}
-                  {...register('first_name')}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name</Label>
-                <Input
-                  id="last_name"
-                  type="text"
-                  autoComplete="family-name"
-                  disabled={isLoading}
-                  {...register('last_name')}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
-              <Label htmlFor="username">Username *</Label>
-              <Input
-                id="username"
-                type="text"
-                autoComplete="username"
-                disabled={isLoading}
-                {...register('username')}
-                className={errors.username ? 'border-red-500' : ''}
-              />
-              {errors.username && (
-                <p className="text-sm text-red-500">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                disabled={isLoading}
-                {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">New Password *</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -169,7 +140,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password_confirm">Confirm Password *</Label>
+              <Label htmlFor="password_confirm">Confirm New Password *</Label>
               <div className="relative">
                 <Input
                   id="password_confirm"
@@ -205,21 +176,9 @@ export default function RegisterPage() {
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               <LoadingButton isLoading={isLoading}>
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {isLoading ? 'Resetting...' : 'Reset Password'}
               </LoadingButton>
             </Button>
-
-            <div className="text-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">
-                Already have an account?{' '}
-              </span>
-              <Link
-                href="/login"
-                className="font-medium text-primary hover:underline"
-              >
-                Sign in
-              </Link>
-            </div>
           </form>
         </CardContent>
       </Card>

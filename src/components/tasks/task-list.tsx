@@ -181,7 +181,7 @@ export function TaskList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => router.push(`/tasks/${task._id}`)}
+                          onClick={() => router.push(`/auth/tasks/${task._id}`)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
@@ -189,7 +189,7 @@ export function TaskList() {
                         {task.is_done_created_doc && !task.error_message && (
                           <DropdownMenuItem
                             onClick={() =>
-                              router.push(`/matching?task=${task._id}`)
+                              router.push(`/auth/search?task=${task._id}`)
                             }
                           >
                             <Search className="mr-2 h-4 w-4" />

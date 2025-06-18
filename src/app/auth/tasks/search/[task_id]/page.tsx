@@ -17,7 +17,7 @@ export default function TaskSearchPage() {
 
   useEffect(() => {
     if (!taskId || !isValidObjectId(taskId)) {
-      router.replace('/tasks')
+      router.replace('/auth/tasks')
     }
   }, [taskId, router])
 
@@ -28,7 +28,7 @@ export default function TaskSearchPage() {
   })
 
   const onCreateSearchSuccess = () => {
-    router.replace('/search')
+    router.push('/auth/search')
   }
 
   if (!taskData) {

@@ -91,3 +91,6 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Claude Console
+settings.local.json

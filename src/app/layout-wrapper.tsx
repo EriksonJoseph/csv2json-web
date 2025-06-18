@@ -7,10 +7,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   // Pages that should not use the app layout
-  const authPages = ['/login', '/register']
-  const isAuthPage = authPages.includes(pathname)
+  const publicPages = [
+    '/login',
+    '/register',
+    '/verify-email',
+    '/reset-password',
+  ]
+  const isPublicPage = publicPages.some((page) => pathname.startsWith(page))
 
-  if (isAuthPage) {
+  if (isPublicPage) {
     return <>{children}</>
   }
 
