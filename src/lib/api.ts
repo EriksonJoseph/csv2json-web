@@ -20,6 +20,9 @@ import {
   UserUpdateRequest,
   ChangePasswordRequest,
   PaginationParams,
+  VerifyEmailRequest,
+  ResetPasswordRequest,
+  ForgotPasswordRequest,
 } from '@/types'
 
 export const authApi = {
@@ -40,9 +43,6 @@ export const authApi = {
 
   verifyEmail: (token: string, password: string) =>
     api.post('/auth/verify-email', { token, password }),
-
-  resetPassword: (token: string, password: string) =>
-    api.post('/auth/reset-password', { token, password }),
 }
 
 export const filesApi = {
@@ -108,4 +108,13 @@ export const usersApi = {
     api.post('/user/change-password', data),
 
   list: (params?: PaginationParams) => api.get('user', { params }),
+
+  verifyEmail: (data: VerifyEmailRequest) =>
+    api.post('/user/verify-email', data),
+
+  resetPassword: (data: ResetPasswordRequest) =>
+    api.post('/user/reset-password', data),
+
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    api.post('/user/forgot-password', data),
 }

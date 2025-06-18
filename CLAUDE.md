@@ -167,4 +167,21 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Component Testing**: Structured for easy testing setup
 - **Hot Reloading**: Fast development with Next.js dev server
 
+## Important Development Notes
+
+### Public Pages Configuration
+
+When creating new pages outside the `/auth` directory, **ALWAYS** remember to add them to the `publicPages` array in `/src/app/layout-wrapper.tsx`. This prevents the app layout from being applied to authentication-related pages.
+
+Example:
+```typescript
+const publicPages = [
+  '/login',
+  '/register',
+  '/verify-email',
+  '/reset-password',
+  '/forgot-password', // Always add new public pages here
+]
+```
+
 - `to memorize`

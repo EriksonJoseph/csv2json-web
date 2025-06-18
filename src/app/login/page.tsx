@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
+import Link from 'next/link'
 import { useAuthStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading'
@@ -143,6 +144,15 @@ export default function LoginPage() {
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </LoadingButton>
             </Button>
+
+            <div className="text-center">
+              <Link 
+                href="/forgot-password" 
+                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Forgot your password?
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

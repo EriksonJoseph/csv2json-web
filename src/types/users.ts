@@ -19,3 +19,15 @@ export interface ChangePasswordRequest {
   new_password: string
   confirm_password: string
 }
+
+export interface VerifyEmailRequest {
+  token: string
+  password: string
+  confirm_password: string
+}
+
+export interface ResetPasswordRequest extends VerifyEmailRequest {}
+
+export interface ForgotPasswordRequest {
+  email: string
+}

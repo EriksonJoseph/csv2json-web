@@ -12,6 +12,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     '/register',
     '/verify-email',
     '/reset-password',
+    '/forgot-password',
   ]
   const isPublicPage = publicPages.some((page) => pathname.startsWith(page))
 

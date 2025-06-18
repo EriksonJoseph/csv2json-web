@@ -18,7 +18,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { toast } from 'react-hot-toast'
-import { authApi } from '@/lib/api'
+import { authApi, usersApi } from '@/lib/api'
+import { useMutation } from '@tanstack/react-query'
+import { VerifyEmailRequest } from '@/types'
 
 const verifyEmailSchema = z
   .object({
@@ -29,11 +31,11 @@ const verifyEmailSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       ),
-    password_confirm: z.string(),
+    confirm_password: z.string(),
   })
-  .refine((data) => data.password === data.password_confirm, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "Passwords don't match",
-    path: ['password_confirm'],
+    path: ['confirm_password'],
   })
 
 type VerifyEmailForm = z.infer<typeof verifyEmailSchema>
@@ -41,7 +43,6 @@ type VerifyEmailForm = z.infer<typeof verifyEmailSchema>
 export default function VerifyEmailPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [token, setToken] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -64,9 +65,27 @@ export default function VerifyEmailPage() {
     resolver: zodResolver(verifyEmailSchema),
     defaultValues: {
       password: '',
-      password_confirm: '',
+      confirm_password: '',
     },
   })
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: (data: VerifyEmailRequest) => usersApi.verifyEmail(data),
+    onSuccess: (data: any) => {
+      toast.success('Veriry Email & Create password successfully!')
+      console.log(`🚀🙈 TORPONG [page.tsx] success data`, data)
+      setTimeout(() => {
+        router.replace('/login')
+      }, 1000)
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update profile')
+    },
+  })
+
+  const isLoading = verifyEmailMutation.isPending
+
+  console.log(`🚀🙈 TORPONG [page.tsx] isLoading`, isLoading)
 
   const onSubmit = async (data: VerifyEmailForm) => {
     if (!token) {
@@ -74,18 +93,7 @@ export default function VerifyEmailPage() {
       return
     }
 
-    setIsLoading(true)
-    try {
-      await authApi.verifyEmail(token, data.password)
-
-      toast.success('Email verified successfully!')
-      router.push('/login')
-    } catch (error) {
-      console.error('Verify email error:', error)
-      toast.error('Failed to verify email. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
+    verifyEmailMutation.mutate({ ...data, token })
   }
 
   if (!token) {
@@ -147,16 +155,16 @@ export default function VerifyEmailPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password_confirm">Confirm Password *</Label>
+              <Label htmlFor="confirm_password">Confirm Password *</Label>
               <div className="relative">
                 <Input
-                  id="password_confirm"
+                  id="confirm_password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   disabled={isLoading}
-                  {...register('password_confirm')}
+                  {...register('confirm_password')}
                   className={
-                    errors.password_confirm ? 'border-red-500 pr-10' : 'pr-10'
+                    errors.confirm_password ? 'border-red-500 pr-10' : 'pr-10'
                   }
                 />
                 <Button
@@ -174,9 +182,9 @@ export default function VerifyEmailPage() {
                   )}
                 </Button>
               </div>
-              {errors.password_confirm && (
+              {errors.confirm_password && (
                 <p className="text-sm text-red-500">
-                  {errors.password_confirm.message}
+                  {errors.confirm_password.message}
                 </p>
               )}
             </div>

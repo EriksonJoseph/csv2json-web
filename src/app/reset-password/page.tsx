@@ -18,16 +18,16 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { toast } from 'react-hot-toast'
-import { authApi } from '@/lib/api'
+import { usersApi } from '@/lib/api'
 
 const resetPasswordSchema = z
   .object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
-    password_confirm: z.string(),
+    confirm_password: z.string(),
   })
-  .refine((data) => data.password === data.password_confirm, {
+  .refine((data) => data.password === data.confirm_password, {
     message: "Passwords don't match",
-    path: ['password_confirm'],
+    path: ['confirm_password'],
   })
 
 type ResetPasswordForm = z.infer<typeof resetPasswordSchema>
@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: '',
-      password_confirm: '',
+      confirm_password: '',
     },
   })
 
@@ -70,7 +70,7 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true)
     try {
-      await authApi.resetPassword(token, data.password)
+      await usersApi.resetPassword({ ...data, token })
       toast.success('Password reset successfully!')
       router.push('/login')
     } catch (error) {
@@ -140,16 +140,16 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password_confirm">Confirm New Password *</Label>
+              <Label htmlFor="confirm_password">Confirm New Password *</Label>
               <div className="relative">
                 <Input
-                  id="password_confirm"
+                  id="confirm_password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   disabled={isLoading}
-                  {...register('password_confirm')}
+                  {...register('confirm_password')}
                   className={
-                    errors.password_confirm ? 'border-red-500 pr-10' : 'pr-10'
+                    errors.confirm_password ? 'border-red-500 pr-10' : 'pr-10'
                   }
                 />
                 <Button
@@ -167,9 +167,9 @@ export default function ResetPasswordPage() {
                   )}
                 </Button>
               </div>
-              {errors.password_confirm && (
+              {errors.confirm_password && (
                 <p className="text-sm text-red-500">
-                  {errors.password_confirm.message}
+                  {errors.confirm_password.message}
                 </p>
               )}
             </div>
