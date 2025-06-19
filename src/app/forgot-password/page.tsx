@@ -65,7 +65,8 @@ export default function ForgotPasswordPage() {
               Check your email
             </CardTitle>
             <CardDescription className="text-center">
-              We sent a password reset link to <strong>{getValues('email')}</strong>
+              We sent a password reset link to{' '}
+              <strong>{getValues('email')}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -100,7 +101,8 @@ export default function ForgotPasswordPage() {
             Forgot your password?
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email address and we'll send you a link to reset your password
+            Enter your email address and we'll send you a link to reset your
+            password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -117,9 +119,7 @@ export default function ForgotPasswordPage() {
                 placeholder="Enter your email address"
               />
               {errors.email && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 
@@ -128,8 +128,8 @@ export default function ForgotPasswordPage() {
             </Button>
 
             <div className="text-center">
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
               >
                 Back to login

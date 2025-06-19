@@ -23,6 +23,8 @@ import {
   VerifyEmailRequest,
   ResetPasswordRequest,
   ForgotPasswordRequest,
+  UserListResonse,
+  CommonApiResponse,
 } from '@/types'
 
 export const authApi = {
@@ -41,8 +43,8 @@ export const authApi = {
 
   me: () => api.get<User>('/auth/me'),
 
-  verifyEmail: (token: string, password: string) =>
-    api.post('/auth/verify-email', { token, password }),
+  unlock: (user_id: string) =>
+    api.post<CommonApiResponse>(`/auth/unlock/${user_id}`),
 }
 
 export const filesApi = {
@@ -107,7 +109,8 @@ export const usersApi = {
   changePassword: (data: ChangePasswordRequest) =>
     api.post('/user/change-password', data),
 
-  list: (params?: PaginationParams) => api.get('user', { params }),
+  list: (params?: PaginationParams) =>
+    api.get<UserListResonse>('user', { params }),
 
   verifyEmail: (data: VerifyEmailRequest) =>
     api.post('/user/verify-email', data),
@@ -117,4 +120,7 @@ export const usersApi = {
 
   forgotPassword: (data: ForgotPasswordRequest) =>
     api.post('/user/forgot-password', data),
+
+  resendVerificationEmail: (user_id: string) =>
+    api.post<CommonApiResponse>(`/user/${user_id}/resend-verification`),
 }

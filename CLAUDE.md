@@ -174,6 +174,7 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 When creating new pages outside the `/auth` directory, **ALWAYS** remember to add them to the `publicPages` array in `/src/app/layout-wrapper.tsx`. This prevents the app layout from being applied to authentication-related pages.
 
 Example:
+
 ```typescript
 const publicPages = [
   '/login',
@@ -183,5 +184,92 @@ const publicPages = [
   '/forgot-password', // Always add new public pages here
 ]
 ```
+
+### Pagination Implementation Pattern
+
+When creating pages with pagination, follow this consistent pattern:
+
+#### Required Imports
+```typescript
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Pagination } from '@/components/ui/pagination'
+import { PaginationParams } from '@/types'
+```
+
+#### State Management
+```typescript
+const [page, setPage] = useState(1)
+const [limit, setLimit] = useState(9)  // Default 9 items per page
+const [searchTerm, setSearchTerm] = useState('')  // If search functionality needed
+```
+
+#### Query Parameters Setup
+```typescript
+const queryParams: PaginationParams = {
+  page: page,
+  limit: limit,
+}
+```
+
+#### API Query with React Query
+```typescript
+const { data: itemsData, isLoading } = useQuery({
+  queryKey: ['items-key', page, limit, searchTerm], // Include all dependencies
+  queryFn: () => apiFunction.list(queryParams).then((res) => res.data),
+  enabled: !!conditionalCheck, // Add conditions if needed
+})
+```
+
+#### Data Display Pattern
+```typescript
+// For API response structure like: { data: [], total: number, total_pages: number }
+{itemsData?.data?.map((item) => (
+  <TableRow key={item._id}>
+    {/* Table content */}
+  </TableRow>
+))}
+```
+
+#### Pagination Component Usage
+```typescript
+<Pagination
+  currentPage={page}
+  totalItems={itemsData?.total || 0}
+  itemsPerPage={limit}
+  onPageChange={setPage}
+  onItemsPerPageChange={(newPerPage) => {
+    setLimit(newPerPage)
+    setPage(1)  // Reset to first page when changing limit
+  }}
+  itemsPerPageOptions={[1, 6, 9, 12, 15, 24]}
+  className="pt-4"
+/>
+```
+
+#### API Response Structure
+```typescript
+interface ApiResponse {
+  data: ItemType[]           // Array of items (not "items" or "list")
+  total: number             // Total count
+  total_pages: number       // Total pages
+  page: number             // Current page
+  per_page: number         // Items per page
+}
+```
+
+#### Key Points
+- Always use `page`/`setPage` and `limit`/`setLimit` as state variable names
+- Default limit is `9`
+- Include all dependencies in React Query's `queryKey`
+- Reset page to 1 when changing items per page
+- Use `itemsData?.data` for the items array (not `.items` or `.list`)
+- Use `itemsData?.total` for total count
+- Use `itemsData?.total_pages` for pagination checks
+
+#### Reference Files
+- `/src/app/auth/tasks/page.tsx` - Complete working example
+- `/src/app/auth/user-management/page.tsx` - Recent implementation
+- `/src/components/ui/pagination.tsx` - Pagination component
 
 - `to memorize`

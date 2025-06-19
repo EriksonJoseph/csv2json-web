@@ -6,11 +6,7 @@ export interface User {
   middle_name?: string
   last_name?: string
   is_active: boolean
-  is_staff: boolean
-  is_superuser: boolean
-  created_at: string
-  updated_at: string
-  last_login?: string
+  roles: string[]
 }
 
 export interface LoginRequest {

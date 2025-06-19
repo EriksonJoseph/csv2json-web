@@ -39,7 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Header />
         <main className="p-6">{children}</main>
       </div>
-      <Analytics />
+      <Analytics debug={false} />
     </div>
   )
 }

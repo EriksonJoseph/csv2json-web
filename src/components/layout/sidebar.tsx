@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useUIStore } from '@/store'
-import { Home, ListTodo, Search, Menu, X } from 'lucide-react'
+import { useUIStore, useAuthStore } from '@/store'
+import { Home, ListTodo, Search, Menu, Users } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/auth/dashboard', icon: Home },
@@ -13,9 +13,14 @@ const navigation = [
   { name: 'Matching', href: '/auth/search', icon: Search },
 ]
 
+const adminNavigation = [
+  { name: 'User Management', href: '/auth/user-management', icon: Users },
+]
+
 export function Sidebar() {
   const pathname = usePathname()
   const { sidebarCollapsed, toggleSidebar } = useUIStore()
+  const { user } = useAuthStore()
 
   return (
     <>
@@ -61,6 +66,37 @@ export function Sidebar() {
                 </Link>
               )
             })}
+
+            {user?.roles.includes('admin') && (
+              <>
+                {!sidebarCollapsed && (
+                  <div className="px-3 py-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Admin
+                    </h3>
+                  </div>
+                )}
+                {adminNavigation.map((item) => {
+                  const isActive = pathname.startsWith(item.href)
+                  return (
+                    <Link key={item.name} href={item.href}>
+                      <Button
+                        variant={isActive ? 'secondary' : 'ghost'}
+                        className={cn(
+                          'w-full justify-start',
+                          sidebarCollapsed && 'justify-center px-2'
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {!sidebarCollapsed && (
+                          <span className="ml-3">{item.name}</span>
+                        )}
+                      </Button>
+                    </Link>
+                  )
+                })}
+              </>
+            )}
           </nav>
         </div>
       </div>

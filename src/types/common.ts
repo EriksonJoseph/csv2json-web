@@ -66,3 +66,8 @@ export interface SystemHealth {
   background_tasks: 'running' | 'stopped'
   last_check: string
 }
+
+export interface CommonApiResponse {
+  status: string
+  message: string
+}
