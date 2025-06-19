@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { toast } from 'react-hot-toast'
+import { getAppVersion } from '@/lib/version'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -91,6 +92,12 @@ export default function ForgotPasswordPage() {
               </Link>
             </div>
           </CardContent>
+          <div className="px-6 pb-6">
+            <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+              Powered by Next.js • Developed by TORPONG • Version{' '}
+              {getAppVersion()}
+            </div>
+          </div>
         </Card>
       </div>
     )
@@ -140,6 +147,12 @@ export default function ForgotPasswordPage() {
             </div>
           </form>
         </CardContent>
+        <div className="px-6 pb-6">
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+            Powered by Next.js • Developed by TORPONG • Version{' '}
+            {getAppVersion()}
+          </div>
+        </div>
       </Card>
     </div>
   )

@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { getAppVersion } from '@/lib/version'
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -208,6 +209,12 @@ export default function LoginPage() {
             </div>
           </form>
         </CardContent>
+        <div className="px-6 pb-6">
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+            Powered by Next.js • Developed by TORPONG • Version{' '}
+            {getAppVersion()}
+          </div>
+        </div>
       </Card>
     </div>
   )

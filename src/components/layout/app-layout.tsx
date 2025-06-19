@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
+import { Footer } from '@/components/layout/footer'
 import { useAuthStore, useUIStore } from '@/store'
 import { cn } from '@/lib/utils'
 import { LoadingOverlay } from '@/components/ui/loading'
@@ -28,16 +29,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Sidebar />
       <div
         className={cn(
-          'transition-all duration-200 ease-in-out',
+          'flex flex-1 flex-col transition-all duration-200 ease-in-out',
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
         )}
       >
         <Header />
-        <main className="p-6">{children}</main>
+        <main className="flex-1 p-6">{children}</main>
+        <Footer />
       </div>
       <Analytics debug={false} />
     </div>
