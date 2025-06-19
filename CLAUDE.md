@@ -272,4 +272,47 @@ interface ApiResponse {
 - `/src/app/auth/user-management/page.tsx` - Recent implementation
 - `/src/components/ui/pagination.tsx` - Pagination component
 
+## Authentication Best Practices
+
+### Login Redirect Issue Fix
+- **Problem**: Auth state not synced before redirect causing "Authenticating..." loop
+- **Root Cause**: Zustand persist state + localStorage + component state sync timing issues
+- **Solution**: Force localStorage sync + state-aware redirect pattern
+- **Key Pattern**: Always wait for auth state ready before navigation
+
+#### Implementation Details:
+1. **Force Immediate Persistence** in `login()` function:
+   ```typescript
+   // Force localStorage update immediately after login
+   localStorage.setItem('auth-storage', JSON.stringify({
+     state: { user, isAuthenticated: true },
+     version: 0
+   }))
+   ```
+
+2. **State-Aware Redirect** in login component:
+   ```typescript
+   // Wait for auth state to be ready before redirect
+   while (attempts < maxAttempts) {
+     const authState = useAuthStore.getState()
+     if (authState.isAuthenticated && authState.user && authState.isHydrated) {
+       break
+     }
+     await new Promise((resolve) => setTimeout(resolve, 50))
+   }
+   window.location.href = '/auth/dashboard' // Force navigation
+   ```
+
+3. **Immediate Auth State Setting** in `hydrate()`:
+   ```typescript
+   if (!currentState.user && token) {
+     set({ isAuthenticated: true }) // Set immediately if token exists
+   }
+   ```
+
+#### Files Modified:
+- `/src/store/auth.ts` - Force persistence + immediate auth state
+- `/src/app/login/page.tsx` - State-aware redirect pattern
+- `/src/components/layout/app-layout.tsx` - Improved loading conditions
+
 - `to memorize`

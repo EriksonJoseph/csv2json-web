@@ -38,12 +38,29 @@ export const useAuthStore = create<AuthState>()(
           document.cookie = `access_token=${access_token}; path=/; max-age=${30 * 24 * 60 * 60}`
           setAuthToken(access_token)
 
-          set({
+          // Update state with force persistence
+          const newState = {
             user,
             isAuthenticated: true,
             isLoading: false,
             isHydrated: true,
-          })
+          }
+
+          set(newState)
+
+          // Force the persisted storage to update immediately
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(
+              'auth-storage',
+              JSON.stringify({
+                state: {
+                  user,
+                  isAuthenticated: true,
+                },
+                version: 0,
+              })
+            )
+          }
 
           toast.success('Successfully logged in!')
         } catch (error: any) {
@@ -168,13 +185,10 @@ export const useAuthStore = create<AuthState>()(
         const token = localStorage.getItem('access_token')
         if (token) {
           setAuthToken(token)
-          // Only refresh user if we don't already have user data and are not already hydrated
+          // If we have a token but no user data, we need to fetch user info
           const currentState = get()
-          if (
-            !currentState.user &&
-            currentState.isAuthenticated &&
-            !currentState.isHydrated
-          ) {
+          if (!currentState.user && token) {
+            set({ isAuthenticated: true }) // Set authenticated immediately if we have a token
             get()
               .refreshUser()
               .catch(() => {
@@ -192,8 +206,12 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
+        console.log('[AUTH_STORE] Rehydrating storage:', state)
         if (state) {
-          state.hydrate()
+          // Ensure hydrate is called after rehydration
+          setTimeout(() => {
+            state.hydrate()
+          }, 0)
         }
       },
     }

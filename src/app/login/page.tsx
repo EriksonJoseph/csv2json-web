@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -34,7 +33,6 @@ type LoginForm = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  const router = useRouter()
   const { login, isLoading } = useAuthStore()
 
   const {
@@ -68,11 +66,42 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       setLoginError(null) // Clear any previous errors
+      console.log('[LOGIN] Starting login process...')
+
       await login(data)
-      // Add a small delay to let the success toast show before redirecting
-      setTimeout(() => {
-        router.replace('/auth/dashboard')
-      }, 500)
+      console.log('[LOGIN] Login API completed')
+
+      // Wait for auth state to be properly updated
+      let attempts = 0
+      const maxAttempts = 20
+
+      while (attempts < maxAttempts) {
+        const authState = useAuthStore.getState()
+        console.log('[LOGIN] Checking auth state:', {
+          attempt: attempts + 1,
+          isAuthenticated: authState.isAuthenticated,
+          hasUser: !!authState.user,
+          isHydrated: authState.isHydrated,
+        })
+
+        if (
+          authState.isAuthenticated &&
+          authState.user &&
+          authState.isHydrated
+        ) {
+          console.log('[LOGIN] Auth state ready, redirecting...')
+          break
+        }
+        await new Promise((resolve) => setTimeout(resolve, 50))
+        attempts++
+      }
+
+      if (attempts >= maxAttempts) {
+        console.warn('[LOGIN] Max attempts reached, forcing redirect anyway')
+      }
+
+      // Use push instead of replace to ensure proper navigation
+      window.location.href = '/auth/dashboard'
     } catch (error) {
       console.error('[AUTH] Login failed:', {
         username: data.username,

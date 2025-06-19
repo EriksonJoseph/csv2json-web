@@ -24,8 +24,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, isHydrated, router])
 
-  if (!isHydrated || !isAuthenticated || !user) {
+  // Show loading while hydrating or when authenticated but no user data yet
+  if (!isHydrated || (isAuthenticated && !user)) {
     return <LoadingOverlay message="Authenticating..." />
+  }
+
+  // If not authenticated after hydration, let the useEffect handle redirect
+  if (!isAuthenticated) {
+    return <LoadingOverlay message="Redirecting..." />
   }
 
   return (
