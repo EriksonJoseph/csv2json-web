@@ -16,6 +16,10 @@ export interface UserUpdateRequest {
   email: string
 }
 
+export interface UserCreateRequest extends UserUpdateRequest {
+  username: string
+}
+
 export interface ChangePasswordRequest {
   current_password: string
   new_password: string
@@ -91,3 +95,10 @@ export interface UserListResult {
 }
 
 export interface UserListResponse extends PaginatedResponse<UserListResult> {}
+
+export interface UserCreateResponse {
+  id: string
+  username: string
+  email: string
+  message: 'User created successfully. Please check your email to set up your password and verify your account.'
+}

@@ -25,6 +25,8 @@ import {
   ForgotPasswordRequest,
   UserListResponse,
   CommonApiResponse,
+  UserCreateRequest,
+  UserCreateResponse,
 } from '@/types'
 
 export const authApi = {
@@ -102,6 +104,9 @@ export const usersApi = {
   getMe: () => api.get('/user/me'),
 
   getProfile: (user_id: string) => api.get<UserProfile>(`/user/${user_id}`),
+
+  createProfile: (data: UserCreateRequest) =>
+    api.post<UserCreateResponse>('/user', data),
 
   updateProfile: (userId: string, data: UserUpdateRequest) =>
     api.patch<UserProfile>(`/user/${userId}`, data),

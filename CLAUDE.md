@@ -190,6 +190,7 @@ const publicPages = [
 When creating pages with pagination, follow this consistent pattern:
 
 #### Required Imports
+
 ```typescript
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -198,13 +199,15 @@ import { PaginationParams } from '@/types'
 ```
 
 #### State Management
+
 ```typescript
 const [page, setPage] = useState(1)
-const [limit, setLimit] = useState(9)  // Default 9 items per page
-const [searchTerm, setSearchTerm] = useState('')  // If search functionality needed
+const [limit, setLimit] = useState(9) // Default 9 items per page
+const [searchTerm, setSearchTerm] = useState('') // If search functionality needed
 ```
 
 #### Query Parameters Setup
+
 ```typescript
 const queryParams: PaginationParams = {
   page: page,
@@ -213,6 +216,7 @@ const queryParams: PaginationParams = {
 ```
 
 #### API Query with React Query
+
 ```typescript
 const { data: itemsData, isLoading } = useQuery({
   queryKey: ['items-key', page, limit, searchTerm], // Include all dependencies
@@ -222,6 +226,7 @@ const { data: itemsData, isLoading } = useQuery({
 ```
 
 #### Data Display Pattern
+
 ```typescript
 // For API response structure like: { data: [], total: number, total_pages: number }
 {itemsData?.data?.map((item) => (
@@ -232,6 +237,7 @@ const { data: itemsData, isLoading } = useQuery({
 ```
 
 #### Pagination Component Usage
+
 ```typescript
 <Pagination
   currentPage={page}
@@ -248,17 +254,19 @@ const { data: itemsData, isLoading } = useQuery({
 ```
 
 #### API Response Structure
+
 ```typescript
 interface ApiResponse {
-  data: ItemType[]           // Array of items (not "items" or "list")
-  total: number             // Total count
-  total_pages: number       // Total pages
-  page: number             // Current page
-  per_page: number         // Items per page
+  data: ItemType[] // Array of items (not "items" or "list")
+  total: number // Total count
+  total_pages: number // Total pages
+  page: number // Current page
+  per_page: number // Items per page
 }
 ```
 
 #### Key Points
+
 - Always use `page`/`setPage` and `limit`/`setLimit` as state variable names
 - Default limit is `9`
 - Include all dependencies in React Query's `queryKey`
@@ -268,6 +276,7 @@ interface ApiResponse {
 - Use `itemsData?.total_pages` for pagination checks
 
 #### Reference Files
+
 - `/src/app/auth/tasks/page.tsx` - Complete working example
 - `/src/app/auth/user-management/page.tsx` - Recent implementation
 - `/src/components/ui/pagination.tsx` - Pagination component
@@ -275,22 +284,29 @@ interface ApiResponse {
 ## Authentication Best Practices
 
 ### Login Redirect Issue Fix
+
 - **Problem**: Auth state not synced before redirect causing "Authenticating..." loop
 - **Root Cause**: Zustand persist state + localStorage + component state sync timing issues
 - **Solution**: Force localStorage sync + state-aware redirect pattern
 - **Key Pattern**: Always wait for auth state ready before navigation
 
 #### Implementation Details:
+
 1. **Force Immediate Persistence** in `login()` function:
+
    ```typescript
    // Force localStorage update immediately after login
-   localStorage.setItem('auth-storage', JSON.stringify({
-     state: { user, isAuthenticated: true },
-     version: 0
-   }))
+   localStorage.setItem(
+     'auth-storage',
+     JSON.stringify({
+       state: { user, isAuthenticated: true },
+       version: 0,
+     })
+   )
    ```
 
 2. **State-Aware Redirect** in login component:
+
    ```typescript
    // Wait for auth state to be ready before redirect
    while (attempts < maxAttempts) {
@@ -311,6 +327,7 @@ interface ApiResponse {
    ```
 
 #### Files Modified:
+
 - `/src/store/auth.ts` - Force persistence + immediate auth state
 - `/src/app/login/page.tsx` - State-aware redirect pattern
 - `/src/components/layout/app-layout.tsx` - Improved loading conditions

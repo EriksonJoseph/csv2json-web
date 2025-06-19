@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Users, Search, Edit, Unlock, Mail } from 'lucide-react'
+import { Users, Search, Edit, Unlock, Mail, Plus } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -88,6 +88,10 @@ export default function UserManagementPage() {
     resendVerificationMutation.mutate(userId)
   }
 
+  const handleCreateUser = () => {
+    router.push('/auth/user-management/create-user')
+  }
+
   const getRoleBadgeVariant = (role: string) => {
     return role === 'admin' ? 'default' : 'secondary'
   }
@@ -110,6 +114,10 @@ export default function UserManagementPage() {
               User Management
             </h1>
           </div>
+          <Button onClick={handleCreateUser}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create User
+          </Button>
         </div>
 
         <Card>
