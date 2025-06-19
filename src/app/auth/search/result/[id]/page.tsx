@@ -7,7 +7,7 @@ import { searchApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Download, XCircle } from 'lucide-react'
+import { ArrowLeft, XCircle, Copy } from 'lucide-react'
 import TaskInfo from '@/components/tasks/task-info'
 import SearchCriteria from '@/components/search/search-criteria'
 import SearchResultsTable from '@/components/search/search-results-table'
@@ -27,6 +27,22 @@ export default function MatchingResultPage() {
   })
 
   const taskData = result?.task_detail
+
+  const handleDuplicateSearch = () => {
+    if (!result) return
+
+    const searchData = {
+      column_names: result.column_names,
+      column_options: result.column_options,
+      query_list: result.query_list,
+    }
+
+    // Store the search data in sessionStorage to pass to the next page
+    sessionStorage.setItem('duplicate-search-data', JSON.stringify(searchData))
+
+    // Navigate to the task search page
+    router.push(`/auth/tasks/search/${result.task_id}`)
+  }
 
   // #region Handle error
   if (error || !result || result.status === 'failed') {
@@ -89,6 +105,15 @@ export default function MatchingResultPage() {
             </div>
           </div>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDuplicateSearch}
+          className="flex items-center gap-2"
+        >
+          <Copy className="h-4 w-4" />
+          Duplicate Search
+        </Button>
       </div>
       {/* Task Information Section */}
       {taskData && <TaskInfo task={taskData} />}

@@ -1,5 +1,5 @@
-import packageLock from '../../package-lock.json'
+import _package from '../../package.json'
 
 export function getAppVersion(): string {
-  return packageLock.version
+  return _package.version
 }

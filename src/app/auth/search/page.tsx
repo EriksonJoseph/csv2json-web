@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -13,11 +13,19 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  MoreHorizontal,
+  Copy,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs'
 import { Badge } from '@/components/ui/badge'
 import { Pagination } from '@/components/ui/pagination'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { getPagiantionRowNumber } from '@/lib/utils'
 import { searchApi } from '@/lib/api'
 import toast from 'react-hot-toast'
@@ -52,6 +60,20 @@ export default function SearchPage() {
     },
   })
   // #endregion
+
+  const handleDuplicateSearch = (history: any) => {
+    const searchData = {
+      column_names: history.column_names,
+      column_options: history.column_options,
+      query_list: history.query_list,
+    }
+
+    // Store the search data in sessionStorage to pass to the next page
+    sessionStorage.setItem('duplicate-search-data', JSON.stringify(searchData))
+
+    // Navigate to the task search page
+    router.push(`/auth/tasks/search/${history.task_id}`)
+  }
 
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
@@ -202,7 +224,7 @@ export default function SearchPage() {
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="flex items-center justify-between space-x-2">
+                    <CardFooter className="flex items-center justify-between space-x-2 p-2">
                       {['failed', 'completed'].includes(
                         history.status || ''
                       ) && (
@@ -210,7 +232,7 @@ export default function SearchPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full"
+                            className="flex-1"
                             onClick={() =>
                               router.push(`/auth/search/result/${history._id}`)
                             }
@@ -218,15 +240,30 @@ export default function SearchPage() {
                             <Eye className="mr-2 h-4 w-4" />
                             View Results
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full text-red-500"
-                            onClick={() => deleteMutation.mutate(history._id)}
-                          >
-                            <Trash className="mr-2 h-4 w-4" />
-                            Delete
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleDuplicateSearch(history)}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate Search
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  deleteMutation.mutate(history._id)
+                                }
+                                className="text-red-600 dark:text-red-400"
+                              >
+                                <Trash className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </>
                       )}
                     </CardFooter>

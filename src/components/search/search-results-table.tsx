@@ -62,6 +62,13 @@ export default function SearchResultsTable({
     })
   }, [results, activeFilter, columnNames])
 
+  // all column
+  const allColumns = useMemo(() => {
+    if (!results) return []
+    const firstOne = results[0].column_results
+    return Object.keys(firstOne)
+  }, [results])
+
   const handleFilterClick = (filterType: string) => {
     setActiveFilter(activeFilter === filterType ? null : filterType)
   }
@@ -139,7 +146,7 @@ export default function SearchResultsTable({
               <TableRow>
                 <TableHead className="w-12">No</TableHead>
                 <TableHead className="min-w-[200px]">Query Name</TableHead>
-                {columnNames.map((columnName) => (
+                {allColumns.map((columnName) => (
                   <TableHead key={columnName} className="text-center">
                     {columnName}
                   </TableHead>
@@ -165,7 +172,7 @@ export default function SearchResultsTable({
                     <TableCell className="font-medium">
                       {result.query_name}
                     </TableCell>
-                    {columnNames.map((columnName) => {
+                    {allColumns.map((columnName) => {
                       const columnResult = result.column_results[columnName]
                       if (!columnResult) {
                         return (

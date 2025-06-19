@@ -14,6 +14,14 @@ import toast from 'react-hot-toast'
 interface TaskSearchProps {
   task: Task
   onSuccess?: () => void
+  initialData?: {
+    column_names: string[]
+    column_options: Record<string, ColumnOptions>
+    query_list: {
+      no: string
+      [key: string]: string | number
+    }[]
+  }
 }
 
 interface SearchRow {
@@ -27,15 +35,41 @@ interface ColumnOptions {
   match_length: boolean
 }
 
-export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
+export default function TaskSearch({
+  task,
+  onSuccess,
+  initialData,
+}: TaskSearchProps) {
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(
+    initialData?.column_names || []
+  )
   const [searchRows, setSearchRows] = useState<SearchRow[]>([])
   const [columnOptions, setColumnOptions] = useState<
     Record<string, ColumnOptions>
-  >({})
+  >(initialData?.column_options || {})
+
+  // Initialize with data from duplicate search
+  useEffect(() => {
+    if (initialData) {
+      setSelectedColumns(initialData.column_names)
+      setColumnOptions(initialData.column_options)
+
+      // Convert query_list to SearchRow format
+      const initialRows: SearchRow[] = initialData.query_list.map(
+        (item, index) => ({
+          no: index + 1,
+          ...Object.fromEntries(
+            initialData.column_names.map((col) => [col, item[col] || ''])
+          ),
+        })
+      )
+
+      setSearchRows(initialRows)
+    }
+  }, [initialData])
 
   useEffect(() => {
-    if (selectedColumns.length > 0) {
+    if (selectedColumns.length > 0 && !initialData) {
       setSearchRows([
         {
           no: 1,
@@ -63,11 +97,11 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
       })
 
       setColumnOptions(newOptions)
-    } else {
+    } else if (selectedColumns.length === 0 && !initialData) {
       setSearchRows([])
       setColumnOptions({})
     }
-  }, [selectedColumns])
+  }, [selectedColumns, initialData, columnOptions])
 
   const handleColumnSelect = (column: string, checked: boolean) => {
     if (checked && selectedColumns.length < 4) {

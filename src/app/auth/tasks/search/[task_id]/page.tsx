@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { isValidObjectId } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -14,12 +14,42 @@ export default function TaskSearchPage() {
   const params = useParams()
   const router = useRouter()
   const taskId = params.task_id as string
+  const [duplicateSearchData, setDuplicateSearchData] = useState<{
+    column_names: string[]
+    column_options: Record<
+      string,
+      {
+        whole_word: boolean
+        match_case: boolean
+        match_length: boolean
+      }
+    >
+    query_list: {
+      no: string
+      [key: string]: string | number
+    }[]
+  } | null>(null)
 
   useEffect(() => {
     if (!taskId || !isValidObjectId(taskId)) {
       router.replace('/auth/tasks')
     }
   }, [taskId, router])
+
+  // Check for duplicate search data in sessionStorage
+  useEffect(() => {
+    const storedData = sessionStorage.getItem('duplicate-search-data')
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData)
+        setDuplicateSearchData(parsedData)
+        // Clear the data after use
+        sessionStorage.removeItem('duplicate-search-data')
+      } catch (error) {
+        console.error('Failed to parse duplicate search data:', error)
+      }
+    }
+  }, [])
 
   const { data: taskData } = useQuery({
     queryKey: ['task', taskId],
@@ -59,7 +89,11 @@ export default function TaskSearchPage() {
       <TaskInfo task={taskData} />
 
       {/* Search Form Section */}
-      <TaskSearch task={taskData} onSuccess={onCreateSearchSuccess} />
+      <TaskSearch
+        task={taskData}
+        onSuccess={onCreateSearchSuccess}
+        initialData={duplicateSearchData || undefined}
+      />
     </div>
   )
 }
