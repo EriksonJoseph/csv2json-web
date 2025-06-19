@@ -101,7 +101,7 @@ export const searchApi = {
 export const usersApi = {
   getMe: () => api.get('/user/me'),
 
-  getProfile: () => api.get<UserProfile>('/user/profile'),
+  getProfile: (user_id: string) => api.get<UserProfile>(`/user/${user_id}`),
 
   updateProfile: (userId: string, data: UserUpdateRequest) =>
     api.patch<UserProfile>(`/user/${userId}`, data),
