@@ -19,7 +19,9 @@ export default function CreateUserPage() {
     mutationFn: (data: UserCreateRequest) => usersApi.createProfile(data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-      toast.success('User created successfully! A verification email has been sent to set up their password.')
+      toast.success(
+        'User created successfully! A verification email has been sent to set up their password.'
+      )
       router.push('/auth/user-management')
     },
     onError: (error: any) => {

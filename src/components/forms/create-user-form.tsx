@@ -164,10 +164,13 @@ export function CreateUserForm({
           <div className="space-y-4 pt-4">
             <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-950">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Note:</strong> After creating the user, a verification email will be automatically sent to the provided email address. The new user will need to click the verification link to set up their password and activate their account.
+                <strong>Note:</strong> After creating the user, a verification
+                email will be automatically sent to the provided email address.
+                The new user will need to click the verification link to set up
+                their password and activate their account.
               </p>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button type="submit" disabled={disabled || isLoading}>
                 <LoadingButton isLoading={isLoading}>

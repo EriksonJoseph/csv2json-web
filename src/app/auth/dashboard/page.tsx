@@ -34,13 +34,11 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               Learn how to use CSV2JSON with our step-by-step tutorial guide
             </p>
             <Link href="/tutorial">
-              <Button className="w-full">
-                Start Tutorial
-              </Button>
+              <Button className="w-full">Start Tutorial</Button>
             </Link>
           </CardContent>
         </Card>
@@ -53,23 +51,25 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center space-y-4">
-              <div className="flex justify-center items-center gap-2">
-                <Hammer className="h-8 w-8 text-amber-600 dark:text-amber-400 animate-bounce" />
-                <Zap className="h-6 w-6 text-yellow-500 animate-pulse" />
+            <div className="space-y-4 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <Hammer className="h-8 w-8 animate-bounce text-amber-600 dark:text-amber-400" />
+                <Zap className="h-6 w-6 animate-pulse text-yellow-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-2">
+                <h3 className="mb-2 font-semibold text-amber-900 dark:text-amber-200">
                   Dashboard Features
                 </h3>
-                <p className="text-amber-700 dark:text-amber-300 text-sm">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
                   We're developing new dashboard features for you
                 </p>
-                <p className="text-amber-600 dark:text-amber-400 text-xs mt-2">
-                  • Analytics & Statistics<br />
-                  • Recent Activity<br />
-                  • Quick Actions<br />
-                  • Performance Metrics
+                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                  • Analytics & Statistics
+                  <br />
+                  • Recent Activity
+                  <br />
+                  • Quick Actions
+                  <br />• Performance Metrics
                 </p>
               </div>
             </div>

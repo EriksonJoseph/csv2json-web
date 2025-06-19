@@ -167,6 +167,29 @@ NEXT_PUBLIC_APP_VERSION=1.0.0
 - **Component Testing**: Structured for easy testing setup
 - **Hot Reloading**: Fast development with Next.js dev server
 
+### CRITICAL: Build Verification Workflow
+
+**ALWAYS verify build after any code changes. Build failures must be fixed before proceeding.**
+
+#### Required Build Check Steps:
+1. **Run build check**: `npm run build` after every code modification
+2. **Fix formatting errors**: Run `npm run format` if Prettier errors are found
+3. **Resolve type errors**: Ensure TypeScript compilation passes without errors
+4. **Never ignore build failures**: All errors must be resolved before continuing
+
+#### Build Command Sequence:
+```bash
+# After making code changes
+npm run format    # Fix formatting issues
+npm run build     # Verify build passes
+```
+
+#### Why This Matters:
+- Prevents deployment failures
+- Catches type errors early
+- Ensures code quality standards
+- Maintains consistent formatting across the codebase
+
 ## Important Development Notes
 
 ### Public Pages Configuration
