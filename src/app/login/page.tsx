@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { useAuthStore } from '@/store'
+import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading'
 import { Input } from '@/components/ui/input'
@@ -31,6 +32,7 @@ type LoginForm = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
   const router = useRouter()
   const { login, isLoading } = useAuthStore()
 
@@ -47,18 +49,55 @@ export default function LoginPage() {
       password: '',
       remember_me: false,
     },
+    mode: 'onBlur', // Validate on blur to show errors immediately
   })
 
   const rememberMe = watch('remember_me')
 
+  // Clear error when user starts typing
+  const usernameValue = watch('username')
+  const passwordValue = watch('password')
+
+  useEffect(() => {
+    if (loginError) {
+      setLoginError(null)
+    }
+  }, [usernameValue, passwordValue, loginError])
+
   const onSubmit = async (data: LoginForm) => {
     try {
+      setLoginError(null) // Clear any previous errors
       await login(data)
-      // Only redirect on successful login
-      router.push('/auth/dashboard')
+      // Add a small delay to let the success toast show before redirecting
+      setTimeout(() => {
+        router.replace('/auth/dashboard')
+      }, 500)
     } catch (error) {
-      console.error('Login error:', error)
-      // Don't redirect on error - let user see the error message and keep form data
+      console.error('[AUTH] Login failed:', {
+        username: data.username,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+
+      // Extract error message and show it in the form
+      let errorMessage =
+        'Login failed. Please check your credentials and try again.'
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as any).response
+        if (response?.data?.detail) {
+          errorMessage = response.data.detail
+        } else if (response?.data?.message) {
+          errorMessage = response.data.message
+        }
+      }
+
+      setLoginError(errorMessage)
+
+      // Also show toast error for better visibility
+      toast.error(errorMessage, { duration: 4000 })
+
+      // Prevent any navigation/redirect by explicitly staying on the page
+      // Form values are preserved automatically by react-hook-form
     }
   }
 
@@ -75,6 +114,20 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {loginError && (
+              <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                      Login Failed
+                    </h3>
+                    <div className="mt-1 text-sm text-red-700 dark:text-red-300">
+                      {loginError}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input

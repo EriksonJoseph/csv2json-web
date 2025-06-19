@@ -80,7 +80,10 @@ export class ChunkedFileUploader {
         const { api } = await import('@/lib/axios')
         await api.delete(`/files/chunked/${uploadId}`)
       } catch (error) {
-        console.warn('Failed to cancel upload on server:', error)
+        console.warn('[UPLOAD] Failed to cancel upload on server:', {
+          uploadId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
       }
       ChunkedFileUploader.activeSessions.delete(uploadId)
     }
@@ -135,9 +138,11 @@ export class ChunkedFileUploader {
       })
 
       const { upload_id: uploadId } = initiateResponse.data
-      console.log(
-        `🟡 Starting chunked upload: ${totalChunks} chunks for ${file.name} (ID: ${uploadId})`
-      )
+      console.log('[UPLOAD] Starting chunked upload:', {
+        fileName: file.name,
+        totalChunks,
+        uploadId,
+      })
 
       // Create session for tracking
       const session: ChunkUploadSession = {
@@ -211,9 +216,10 @@ export class ChunkedFileUploader {
 
             success = true
             totalUploadedBytes += chunk.size
-            console.log(
-              `🟢 Chunk ${chunkNumber + 1}/${totalChunks} uploaded successfully`
-            )
+            console.log('[UPLOAD] Chunk uploaded:', {
+              chunk: `${chunkNumber + 1}/${totalChunks}`,
+              uploadId,
+            })
 
             // Update progress for completed chunk
             const overallProgress = (totalUploadedBytes / file.size) * 100
@@ -225,17 +231,22 @@ export class ChunkedFileUploader {
               (session.retryCount[chunkNumber] || 0) + 1
 
             if (retry < ChunkedFileUploader.MAX_RETRIES) {
-              console.warn(
-                `🔴 Chunk ${chunkNumber} failed, retrying... (${retry + 1}/${ChunkedFileUploader.MAX_RETRIES})`
-              )
+              console.warn('[UPLOAD] Chunk upload failed, retrying:', {
+                chunk: chunkNumber + 1,
+                attempt: retry + 1,
+                maxRetries: ChunkedFileUploader.MAX_RETRIES,
+                uploadId,
+              })
               await new Promise((resolve) =>
                 setTimeout(resolve, 1000 * (retry + 1))
               ) // Exponential backoff
             } else {
-              console.error(
-                `🔴 Chunk ${chunkNumber} failed after ${ChunkedFileUploader.MAX_RETRIES} retries:`,
-                error
-              )
+              console.error('[UPLOAD] Chunk upload failed permanently:', {
+                chunk: chunkNumber + 1,
+                maxRetries: ChunkedFileUploader.MAX_RETRIES,
+                uploadId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
             }
           }
         }

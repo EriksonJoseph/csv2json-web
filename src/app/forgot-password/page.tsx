@@ -49,7 +49,10 @@ export default function ForgotPasswordPage() {
       setIsSubmitted(true)
       toast.success('Password reset email sent successfully')
     } catch (error) {
-      console.error('Forgot password error:', error)
+      console.error('[AUTH] Forgot password failed:', {
+        email: data.email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
       toast.error('Failed to send password reset email')
     } finally {
       setIsLoading(false)

@@ -23,7 +23,7 @@ import {
   VerifyEmailRequest,
   ResetPasswordRequest,
   ForgotPasswordRequest,
-  UserListResonse,
+  UserListResponse,
   CommonApiResponse,
 } from '@/types'
 
@@ -110,7 +110,7 @@ export const usersApi = {
     api.post('/user/change-password', data),
 
   list: (params?: PaginationParams) =>
-    api.get<UserListResonse>('user', { params }),
+    api.get<UserListResponse>('user', { params }),
 
   verifyEmail: (data: VerifyEmailRequest) =>
     api.post('/user/verify-email', data),

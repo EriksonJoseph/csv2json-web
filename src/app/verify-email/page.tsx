@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -40,7 +40,7 @@ const verifyEmailSchema = z
 
 type VerifyEmailForm = z.infer<typeof verifyEmailSchema>
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [token, setToken] = useState<string | null>(null)
@@ -72,8 +72,7 @@ export default function VerifyEmailPage() {
   const verifyEmailMutation = useMutation({
     mutationFn: (data: VerifyEmailRequest) => usersApi.verifyEmail(data),
     onSuccess: (data: any) => {
-      toast.success('Veriry Email & Create password successfully!')
-      console.log(`🚀🙈 TORPONG [page.tsx] success data`, data)
+      toast.success('Email verified and password created successfully!')
       setTimeout(() => {
         router.replace('/login')
       }, 1000)
@@ -84,8 +83,6 @@ export default function VerifyEmailPage() {
   })
 
   const isLoading = verifyEmailMutation.isPending
-
-  console.log(`🚀🙈 TORPONG [page.tsx] isLoading`, isLoading)
 
   const onSubmit = async (data: VerifyEmailForm) => {
     if (!token) {
@@ -116,7 +113,7 @@ export default function VerifyEmailPage() {
             Verify Your Email
           </CardTitle>
           <CardDescription className="text-center">
-            Create a password to complete your account setup
+            Create a password to complete your email verification
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -191,12 +188,26 @@ export default function VerifyEmailPage() {
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               <LoadingButton isLoading={isLoading}>
-                {isLoading ? 'Loading....' : 'Verify Email & Create Password'}
+                {isLoading ? 'Loading...' : 'Verify Email & Create Password'}
               </LoadingButton>
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   )
 }

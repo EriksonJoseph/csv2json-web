@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { LoadingButton } from '@/components/ui/loading'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
@@ -64,24 +65,11 @@ export default function ChangePasswordPage() {
       }, 1000)
     },
     onError: (error: any) => {
-      // Don't show toast here since axios interceptor already handles it
-      console.error('Change password error:', error)
-
-      // Handle specific validation errors for 422 status
-      if (error.response?.status === 422) {
-        const errorData = error.response?.data
-        console.error('change password error : ', error)
-        if (errorData?.errors) {
-          // Handle field-specific validation errors
-          Object.values(errorData.errors).forEach((err: any) => {
-            if (Array.isArray(err)) {
-              err.forEach((msg) => console.error('Validation error:', msg))
-            } else {
-              console.error('Validation error:', err)
-            }
-          })
-        }
-      }
+      console.error('[AUTH] Change password failed:', {
+        status: error.response?.status,
+        message: error.response?.data?.message,
+        userId: userId,
+      })
     },
   })
 
@@ -104,10 +92,6 @@ export default function ChangePasswordPage() {
       new_password: data.new_password,
       confirm_password: data.confirm_password,
     }
-    console.log(
-      `🚀🙈 TORPONG [page.tsx] changePasswordData`,
-      changePasswordData
-    )
     changePasswordMutation.mutate(changePasswordData)
   }
 
@@ -182,9 +166,11 @@ export default function ChangePasswordPage() {
 
             <div className="flex items-center space-x-2 pt-4">
               <Button type="submit" disabled={changePasswordMutation.isPending}>
-                {changePasswordMutation.isPending
-                  ? 'Changing Password...'
-                  : 'Change Password'}
+                <LoadingButton isLoading={changePasswordMutation.isPending}>
+                  {changePasswordMutation.isPending
+                    ? 'Changing Password...'
+                    : 'Change Password'}
+                </LoadingButton>
               </Button>
             </div>
           </form>

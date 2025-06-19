@@ -168,7 +168,6 @@ export default function TaskSearch({ task, onSuccess }: TaskSearchProps) {
       list: searchRows,
     }
 
-    console.log('Search Form Submission:', JSON.stringify(submitData, null, 2))
     createMuation.mutate(submitData)
   }
 

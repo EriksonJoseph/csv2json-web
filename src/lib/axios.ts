@@ -54,6 +54,19 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as any
 
+    // Skip ALL 401 handling for login/register requests
+    const isLoginRequest =
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/register')
+
+    // If it's a login/register request, just pass the error through without any handling
+    if (isLoginRequest && error.response?.status === 401) {
+      console.log(
+        '[AXIOS] Login/register 401 error - passing through to component'
+      )
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -77,7 +90,7 @@ api.interceptors.response.use(
           throw new Error('No refresh token available')
         }
 
-        console.log(`🟢🟢🟢🟢🟢 Axios Refreshing token`)
+        console.log('[AXIOS] Token refresh initiated')
         const response = await axios.post<TokenRefreshResponse>(
           '/api/proxy/auth/refresh',
           { refresh_token: refreshToken }
@@ -109,7 +122,7 @@ api.interceptors.response.use(
 
     // Handle 403 Forbidden - redirect to login
     if (error.response?.status === 403) {
-      console.log('403 Forbidden detected, redirecting to login...')
+      console.warn('[AXIOS] 403 Forbidden - forcing logout')
 
       // Use dynamic import to avoid circular dependency
       import('@/store/auth').then(({ useAuthStore }) => {
@@ -125,7 +138,12 @@ api.interceptors.response.use(
       (error as Error).message ||
       'An error occurred'
 
-    if (error.response?.status !== 401 && error.response?.status !== 403) {
+    // Don't show toast for login/register errors - let the component handle it
+    if (
+      !isLoginRequest &&
+      error.response?.status !== 401 &&
+      error.response?.status !== 403
+    ) {
       toast.error(errorMessage)
     }
 

@@ -47,11 +47,9 @@ export const useAuthStore = create<AuthState>()(
 
           toast.success('Successfully logged in!')
         } catch (error: any) {
-          console.log(`🚀🙈 TORPONG [auth.ts] error`, error)
-          const message = error.response?.data?.message || 'Login failed'
-          toast.error(message, { duration: 5000 })
+          // Don't update authentication state on login failure - keep current state
           set({ isLoading: false })
-          throw error
+          throw error // Let the component handle the error display
         }
       },
 
@@ -87,7 +85,9 @@ export const useAuthStore = create<AuthState>()(
           const refresh_token = localStorage.getItem('refresh_token') || ''
           await authApi.logout({ refresh_token })
         } catch (error) {
-          console.error('Logout error:', error)
+          console.error('[AUTH] Logout API call failed:', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
         } finally {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
@@ -106,6 +106,19 @@ export const useAuthStore = create<AuthState>()(
       },
 
       forceLogout: () => {
+        console.log('[AUTH_STORE] Force logout called')
+
+        // Don't force logout if we're already on login page
+        if (
+          typeof window !== 'undefined' &&
+          window.location.pathname === '/login'
+        ) {
+          console.log(
+            '[AUTH_STORE] Already on login page, skipping force logout'
+          )
+          return
+        }
+
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         document.cookie =
@@ -120,6 +133,7 @@ export const useAuthStore = create<AuthState>()(
 
         // Force redirect using window.location
         if (typeof window !== 'undefined') {
+          console.log('[AUTH_STORE] Redirecting to login')
           window.location.href = '/login'
         }
       },
@@ -132,7 +146,10 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
           })
         } catch (error) {
-          console.error('Failed to refresh user:', error)
+          console.error('[AUTH] User refresh failed:', {
+            status: (error as any)?.response?.status,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
           // Only logout if the error is not a 401 (which will be handled by axios interceptor)
           if ((error as any)?.response?.status !== 401) {
             get().logout()

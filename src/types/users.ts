@@ -90,4 +90,4 @@ export interface UserListResult {
   password_reset_token: string
 }
 
-export interface UserListResonse extends PaginatedResponse<UserListResult> {}
+export interface UserListResponse extends PaginatedResponse<UserListResult> {}

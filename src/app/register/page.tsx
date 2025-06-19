@@ -63,7 +63,11 @@ export default function RegisterPage() {
       await registerUser(data)
       router.push('/auth/dashboard')
     } catch (error) {
-      console.error('Registration error:', error)
+      console.error('[AUTH] Registration failed:', {
+        username: data.username,
+        email: data.email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 

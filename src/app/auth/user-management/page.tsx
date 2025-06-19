@@ -47,7 +47,6 @@ export default function UserManagementPage() {
     enabled: !!user?.roles?.includes('admin'),
   })
 
-  console.log(`🚀🙈 TORPONG [page.tsx] userData`, usersData)
   const unlockUserMutation = useMutation({
     mutationFn: (userId: string) => authApi.unlock(userId),
     onSuccess: () => {
@@ -82,12 +81,10 @@ export default function UserManagementPage() {
   }
 
   const handleUnlockUser = (userId: string) => {
-    console.log(`🚀🙈 TORPONG [page.tsx] handleUnlockUser`, userId)
     unlockUserMutation.mutate(userId)
   }
 
   const handleResendVerification = (userId: string) => {
-    console.log(`🚀🙈 TORPONG [page.tsx] handleResendVerification`, userId)
     resendVerificationMutation.mutate(userId)
   }
 
@@ -220,7 +217,7 @@ export default function UserManagementPage() {
                                     onClick={() =>
                                       handleUnlockUser(userItem._id)
                                     }
-                                    // disabled={unlockUserMutation.isPending}
+                                    disabled={unlockUserMutation.isPending}
                                   >
                                     <Unlock className="h-4 w-4" />
                                   </Button>
@@ -239,7 +236,9 @@ export default function UserManagementPage() {
                                     onClick={() =>
                                       handleResendVerification(userItem._id)
                                     }
-                                    // disabled={resendVerificationMutation.isPending}
+                                    disabled={
+                                      resendVerificationMutation.isPending
+                                    }
                                   >
                                     <Mail className="h-4 w-4" />
                                   </Button>

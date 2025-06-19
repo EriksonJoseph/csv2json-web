@@ -6,7 +6,7 @@ import { Clock } from 'lucide-react'
 import { tasksApi } from '@/lib/api'
 
 export default function DashboardPage() {
-  const { data: currentTask } = useQuery({
+  const { data: currentTask, isLoading } = useQuery({
     queryKey: ['current-processing'],
     queryFn: () => tasksApi.getCurrentProcessing().then((res) => res.data),
     refetchInterval: 5000,
@@ -23,7 +23,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {currentTask?.task && (
+      {isLoading ? (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 animate-pulse rounded bg-gray-300 dark:bg-gray-600" />
+              <div className="h-6 w-32 animate-pulse rounded bg-gray-300 dark:bg-gray-600" />
+            </div>
+          </CardHeader>
+        </Card>
+      ) : currentTask?.task ? (
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
           <CardHeader className="pb-3">
             <div className="flex items-center space-x-2">
@@ -34,7 +43,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
         </Card>
-      )}
+      ) : null}
     </div>
   )
 }

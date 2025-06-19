@@ -51,15 +51,13 @@ async function proxyRequest(
   path: string[],
   method: string
 ) {
+  const targetPath = path.join('/')
+
   try {
-    const targetPath = path.join('/')
-    console.log(`⚪️⚪️⚪️⚪️⚪️ proxy targetPath: `, targetPath)
     const searchParams = request.nextUrl.searchParams.toString()
-    console.log(`⚪️⚪️⚪️⚪️⚪️ proxy searchParams: `, searchParams)
     const targetUrl = `${API_BASE_URL}/${targetPath}${
       searchParams ? `?${searchParams}` : ''
     }`
-    console.log(`⚪️⚪️⚪️⚪️⚪️ proxy targetUrl: `, targetUrl)
 
     const headers: HeadersInit = {}
 
@@ -73,19 +71,14 @@ async function proxyRequest(
 
     // Handle request body with streaming for large files
     let body: string | FormData | ArrayBuffer | ReadableStream | undefined
-    console.log(`🔵 Processing method: ${method}, contentType: ${contentType}`)
 
     if (method !== 'GET' && method !== 'DELETE') {
       if (contentType?.includes('multipart/form-data')) {
-        console.log(`🟡 ENTERING multipart/form-data processing`)
-        console.log(`🟡 Original Content-Type:`, contentType)
-
         try {
           // For large files, stream directly instead of buffering
           const contentLength = request.headers.get('content-length')
           if (contentLength && parseInt(contentLength) > 4 * 1024 * 1024) {
             // > 4MB
-            console.log(`🟡 Large file detected, using streaming`)
             if (request.body) {
               body = request.body
               headers['Content-Type'] = contentType
@@ -93,10 +86,12 @@ async function proxyRequest(
           } else {
             // Use FormData for smaller files to preserve multipart structure
             body = await request.formData()
-            console.log(`🟡 FormData created successfully`)
           }
         } catch (error) {
-          console.error(`🔴 Error processing multipart data:`, error)
+          console.error('[PROXY] Multipart data processing failed:', {
+            path: targetPath,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
           if (request.body) {
             body = request.body
             headers['Content-Type'] = contentType
@@ -137,13 +132,15 @@ async function proxyRequest(
     const response = await fetch(targetUrl, fetchOptions)
     clearTimeout(timeoutId)
 
-    console.log(`🟢 Backend response status:`, response.status)
-    console.log(`🟢 Backend response ok:`, response.ok)
-
     // Log error responses for debugging
     if (!response.ok) {
       const errorText = await response.clone().text()
-      console.error(`🔴 Backend error ${response.status}:`, errorText)
+      console.error('[PROXY] Backend error:', {
+        status: response.status,
+        path: targetPath,
+        method: method,
+        error: errorText,
+      })
     }
 
     // Forward response headers
@@ -171,7 +168,11 @@ async function proxyRequest(
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json({ error: 'Request timeout' }, { status: 408 })
     }
-    console.error('Proxy error:', error)
+    console.error('[PROXY] Request failed:', {
+      path: targetPath,
+      method: method,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
