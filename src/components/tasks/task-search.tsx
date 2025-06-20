@@ -101,7 +101,7 @@ export default function TaskSearch({
       setSearchRows([])
       setColumnOptions({})
     }
-  }, [selectedColumns, initialData, columnOptions])
+  }, [selectedColumns, initialData])
 
   const handleColumnSelect = (column: string, checked: boolean) => {
     if (checked && selectedColumns.length < 4) {

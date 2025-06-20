@@ -29,6 +29,16 @@ export default function TaskInfo({ task }: TaskInfoProps) {
 
           <div className="space-y-2">
             <div className="flex items-center text-sm text-muted-foreground">
+              <FileText className="mr-2 h-4 w-4" />
+              Filename
+            </div>
+            <p className="truncate font-medium">
+              {task.original_filename || '-'}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center text-sm text-muted-foreground">
               <Database className="mr-2 h-4 w-4" />
               Data Summary
             </div>

@@ -14,6 +14,7 @@ export interface Task {
   total_rows?: number
   total_columns?: number
   column_names: string[]
+  original_filename: string
 }
 
 export interface TaskCreateRequest {

@@ -188,6 +188,9 @@ export default function TasksPage() {
                             Error: {task.error_message}
                           </p>
                         )}
+                        <p className="truncate">
+                          File: {task.original_filename || '-'}
+                        </p>
                         <p>Total columns: {task.total_columns || '-'}</p>
                         <p>Total rows: {task.total_rows || '-'}</p>
                       </div>

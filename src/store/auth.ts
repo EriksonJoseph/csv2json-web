@@ -123,16 +123,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       forceLogout: () => {
-        console.log('[AUTH_STORE] Force logout called')
+        // console.log('[AUTH_STORE] Force logout called')
 
         // Don't force logout if we're already on login page
         if (
           typeof window !== 'undefined' &&
           window.location.pathname === '/login'
         ) {
-          console.log(
-            '[AUTH_STORE] Already on login page, skipping force logout'
-          )
+          // console.log(
+          //   '[AUTH_STORE] Already on login page, skipping force logout'
+          // )
           return
         }
 
@@ -150,7 +150,7 @@ export const useAuthStore = create<AuthState>()(
 
         // Force redirect using window.location
         if (typeof window !== 'undefined') {
-          console.log('[AUTH_STORE] Redirecting to login')
+          // console.log('[AUTH_STORE] Redirecting to login')
           window.location.href = '/login'
         }
       },
@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        console.log('[AUTH_STORE] Rehydrating storage:', state)
+        // console.log('[AUTH_STORE] Rehydrating storage:', state)
         if (state) {
           // Ensure hydrate is called after rehydration
           setTimeout(() => {
